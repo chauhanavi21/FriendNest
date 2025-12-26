@@ -28,13 +28,12 @@ const App = () => {
   return (
     <div className="h-screen" data-theme="night">
       <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-        <Route path="/signup" element={<SignUpPage />} /> 
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/call" element={<CallPage />} />
-        <Route path="/chat" element={<ChatPage />} />
-        <Route path="/onboarding" element={<OnboardingPage />} />
+      <Route
+          path="/signup"
+          element={
+            !isAuthenticated ? <SignUpPage /> : <Navigate to={isOnboarded ? "/" : "/onboarding"} />
+          }
+        />
       </Routes>
 
       <Toaster />
