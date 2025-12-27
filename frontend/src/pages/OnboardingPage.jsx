@@ -52,9 +52,9 @@ const OnboardingPage = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">Complete Your Profile</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* PROFILE PIC CONTAINER */}
+            
             <div className="flex flex-col items-center justify-center space-y-4">
-              {/* IMAGE PREVIEW */}
+              
               <div className="size-32 rounded-full bg-base-300 overflow-hidden">
                 {formState.profilePic ? (
                   <img
@@ -69,7 +69,7 @@ const OnboardingPage = () => {
                 )}
               </div>
 
-              {/* Generate Random Avatar BTN */}
+              
               <div className="flex items-center gap-2">
                 <button type="button" onClick={handleRandomAvatar} className="btn btn-accent">
                   <ShuffleIcon className="size-4 mr-2" />
@@ -78,7 +78,7 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            {/* FULL NAME */}
+            
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Full Name</span>
@@ -93,7 +93,7 @@ const OnboardingPage = () => {
               />
             </div>
 
-            {/* BIO */}
+            
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Bio</span>
@@ -107,9 +107,9 @@ const OnboardingPage = () => {
               />
             </div>
 
-            {/* LANGUAGES */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* NATIVE LANGUAGE */}
+              
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Native Language</span>
@@ -129,7 +129,7 @@ const OnboardingPage = () => {
                 </select>
               </div>
 
-              {/* LEARNING LANGUAGE */}
+              
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Learning Language</span>
@@ -150,7 +150,7 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            {/* LOCATION */}
+            
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Location</span>
@@ -168,7 +168,6 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            {/* SUBMIT BUTTON */}
 
             <button className="btn btn-primary w-full" disabled={isPending} type="submit">
               {!isPending ? (

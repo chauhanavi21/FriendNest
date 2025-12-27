@@ -11,6 +11,7 @@ const SignUpPage = () => {
     password: "",
   });
 
+
   const { isPending, error, signupMutation } = useSignUp();
 
   const handleSignup = (e) => {
@@ -24,7 +25,9 @@ const SignUpPage = () => {
       data-theme="forest"
     >
       <div className="border border-primary/25 flex flex-col lg:flex-row w-full max-w-5xl mx-auto bg-base-100 rounded-xl shadow-lg overflow-hidden">
+        
         <div className="w-full lg:w-1/2 p-4 sm:p-8 flex flex-col">
+          
           <div className="mb-4 flex items-center justify-start gap-2">
             <ShipWheelIcon className="size-9 text-primary" />
             <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
@@ -49,7 +52,6 @@ const SignUpPage = () => {
                 </div>
 
                 <div className="space-y-3">
-                  
                   <div className="form-control w-full">
                     <label className="label">
                       <span className="label-text">Full Name</span>
@@ -128,6 +130,7 @@ const SignUpPage = () => {
             </form>
           </div>
         </div>
+
         <div className="hidden lg:flex w-full lg:w-1/2 bg-primary/10 items-center justify-center">
           <div className="max-w-md p-8">
             <div className="relative aspect-square max-w-sm mx-auto">
