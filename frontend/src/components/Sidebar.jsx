@@ -52,7 +52,7 @@ const Sidebar = () => {
       </nav>
 
       <div className="p-4 border-t border-base-300 mt-auto">
-        <div className="flex items-center gap-3">
+        <Link to="/profile" className="flex items-center gap-3 hover:bg-base-300 rounded-lg p-2 -m-2 transition-colors">
           <Avatar src={authUser?.profilePic} alt="User Avatar" size="md" />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm truncate">{authUser?.fullName}</p>
@@ -61,7 +61,7 @@ const Sidebar = () => {
               Online
             </p>
           </div>
-        </div>
+        </Link>
       </div>
     </aside>
   );
@@ -126,7 +126,7 @@ export const MobileSidebar = ({ isOpen, onClose }) => {
         </nav>
 
         <div className="p-4 border-t border-base-300 mt-auto">
-          <div className="flex items-center gap-3">
+          <Link to="/profile" className="flex items-center gap-3 hover:bg-base-300 rounded-lg p-2 -m-2 transition-colors" onClick={onClose}>
             <Avatar src={authUser?.profilePic} alt="User Avatar" size="md" />
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{authUser?.fullName}</p>
@@ -135,7 +135,7 @@ export const MobileSidebar = ({ isOpen, onClose }) => {
                 Online
               </p>
             </div>
-          </div>
+          </Link>
         </div>
       </aside>
     </>

@@ -47,7 +47,9 @@ const Navbar = ({ onMenuClick }) => {
               <ThemeSelector />
             </div>
 
-            <Avatar src={authUser?.profilePic} alt="User Avatar" size="sm" className="sm:!w-9 sm:!h-9" />
+            <Link to="/profile">
+              <Avatar src={authUser?.profilePic} alt="User Avatar" size="sm" className="sm:!w-9 sm:!h-9 hover:ring-2 ring-primary transition-all cursor-pointer" />
+            </Link>
 
             <button
               className="btn btn-ghost btn-circle h-10 w-10 min-h-10 sm:h-12 sm:w-12 sm:min-h-12"

@@ -176,3 +176,45 @@ export async function getOutgoingFriendReqs(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+export async function updateProfile(req, res) {
+  try {
+    const userId = req.user.id;
+    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic } = req.body;
+
+    const updateData = {};
+    if (fullName) updateData.fullName = fullName;
+    if (bio !== undefined) updateData.bio = bio;
+    if (nativeLanguage) updateData.nativeLanguage = nativeLanguage;
+    if (learningLanguage) updateData.learningLanguage = learningLanguage;
+    if (location !== undefined) updateData.location = location;
+    if (profilePic) updateData.profilePic = profilePic;
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update Stream user if profile pic or name changed
+    try {
+      const { upsertStreamUser } = await import("../lib/stream.js");
+      await upsertStreamUser({
+        id: updatedUser._id.toString(),
+        name: updatedUser.fullName,
+        image: updatedUser.profilePic || "",
+      });
+      console.log(`Stream user updated for ${updatedUser.fullName}`);
+    } catch (streamError) {
+      console.log("Error updating Stream user:", streamError.message);
+    }
+
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error("Error in updateProfile controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
