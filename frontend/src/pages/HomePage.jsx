@@ -111,12 +111,12 @@ const HomePage = () => {
                     key={user._id}
                     className="card bg-base-200 hover:shadow-lg transition-all duration-300 border border-base-300 shadow-sm relative z-10"
                   >
-                    <div className="card-body p-3 sm:p-4 space-y-2 sm:space-y-3">
+                    <div className="card-body p-3 sm:p-4">
                       {/* User Info */}
-                      <div className="flex flex-col items-center text-center gap-2">
+                      <div className="flex flex-col items-center text-center gap-1.5 mb-2">
                         <Avatar src={user.profilePic} alt={user.fullName} size="md" className="sm:!w-12 sm:!h-12 flex-shrink-0" />
                         <div className="min-w-0 w-full">
-                          <h3 className="font-semibold text-sm sm:text-base truncate mb-1">{user.fullName}</h3>
+                          <h3 className="font-semibold text-sm sm:text-base truncate mb-0.5">{user.fullName}</h3>
                           {user.location && (
                             <div className="flex items-center justify-center text-xs opacity-70">
                               <MapPinIcon className="size-3 mr-1 flex-shrink-0" />
@@ -127,7 +127,7 @@ const HomePage = () => {
                       </div>
 
                       {/* Language Badges */}
-                      <div className="flex flex-wrap gap-1 justify-center">
+                      <div className="flex flex-wrap gap-1 justify-center mb-2">
                         <span className="badge badge-secondary text-xs py-1">
                           {getLanguageFlag(user.nativeLanguage)}
                           <span className="ml-1 hidden sm:inline">Native: {capitialize(user.nativeLanguage)}</span>
@@ -140,14 +140,14 @@ const HomePage = () => {
 
                       {/* Bio */}
                       {user.bio && (
-                        <p className="text-xs opacity-70 line-clamp-2 leading-relaxed text-center">
+                        <p className="text-xs opacity-70 line-clamp-2 leading-relaxed text-center mb-2">
                           {user.bio}
                         </p>
                       )}
 
                       {/* Action Button */}
                       <button
-                        className={`btn w-full mt-2 h-9 min-h-9 sm:h-10 sm:min-h-10 text-xs sm:text-sm ${
+                        className={`btn w-full h-9 min-h-9 sm:h-10 sm:min-h-10 text-xs sm:text-sm ${
                           hasRequestBeenSent ? "btn-disabled" : "btn-primary"
                         }`}
                         onClick={() => sendRequestMutation(user._id)}

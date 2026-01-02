@@ -29,10 +29,20 @@ const FriendCard = ({ friend }) => {
   return (
     <div className="card bg-base-200 hover:shadow-md transition-shadow border border-base-300">
       <div className="card-body p-5 sm:p-6">
-        {/* USER INFO */}
-        <div className="flex items-center gap-3 mb-4 sm:mb-5">
-          <Avatar src={friend.profilePic} alt={friend.fullName} size="lg" className="sm:!w-16 sm:!h-16 flex-shrink-0" />
-          <h3 className="font-semibold text-lg sm:text-xl truncate flex-1 min-w-0">{friend.fullName}</h3>
+        {/* USER INFO with Remove Button */}
+        <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Avatar src={friend.profilePic} alt={friend.fullName} size="lg" className="sm:!w-16 sm:!h-16 flex-shrink-0" />
+            <h3 className="font-semibold text-lg sm:text-xl truncate">{friend.fullName}</h3>
+          </div>
+          <button
+            onClick={handleRemoveFriend}
+            disabled={isPending}
+            className="btn btn-error btn-outline btn-sm h-9 min-h-9 sm:h-10 sm:min-h-10 text-xs sm:text-sm flex-shrink-0"
+            title="Remove Friend"
+          >
+            <UserMinusIcon className="size-4" />
+          </button>
         </div>
 
         {/* Language Badges */}
@@ -47,23 +57,13 @@ const FriendCard = ({ friend }) => {
           </span>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-2">
-          <Link 
-            to={`/chat/${friend._id}`} 
-            className="btn btn-outline w-full h-11 min-h-11 sm:h-12 sm:min-h-12 text-sm sm:text-base"
-          >
-            Message
-          </Link>
-          <button
-            onClick={handleRemoveFriend}
-            disabled={isPending}
-            className="btn btn-error btn-outline w-full h-11 min-h-11 sm:h-12 sm:min-h-12 text-sm sm:text-base"
-          >
-            <UserMinusIcon className="size-4 mr-2" />
-            {isPending ? "Removing..." : "Remove Friend"}
-          </button>
-        </div>
+        {/* Message Button */}
+        <Link 
+          to={`/chat/${friend._id}`} 
+          className="btn btn-outline w-full h-11 min-h-11 sm:h-12 sm:min-h-12 text-sm sm:text-base"
+        >
+          Message
+        </Link>
       </div>
     </div>
   );
