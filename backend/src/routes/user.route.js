@@ -6,6 +6,7 @@ import {
   getMyFriends,
   getOutgoingFriendReqs,
   getRecommendedUsers,
+  removeFriend,
   sendFriendRequest,
   updateProfile,
 } from "../controllers/user.controller.js";
@@ -24,5 +25,6 @@ router.get("/friend-requests", getFriendRequests);
 router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
 
 router.put("/profile", updateProfile);
+router.delete("/friends/:id", removeFriend);
 
 export default router;

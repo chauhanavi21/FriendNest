@@ -69,7 +69,7 @@ const HomePage = () => {
         ) : friends.length === 0 ? (
           <NoFriendsFound />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-4 lg:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
             {friends.map((friend) => (
               <FriendCard key={friend._id} friend={friend} />
             ))}
@@ -102,7 +102,7 @@ const HomePage = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {recommendedUsers.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
 
@@ -111,15 +111,14 @@ const HomePage = () => {
                     key={user._id}
                     className="card bg-base-200 hover:shadow-lg transition-all duration-300 border border-base-300 shadow-sm relative z-10"
                   >
-                    <div className="card-body p-4 sm:p-5 space-y-3 sm:space-y-4">
+                    <div className="card-body p-3 sm:p-4 space-y-2 sm:space-y-3">
                       {/* User Info */}
-                      <div className="flex items-start gap-3">
-                        <Avatar src={user.profilePic} alt={user.fullName} size="lg" className="sm:!w-14 sm:!h-14 lg:!w-16 lg:!h-16 flex-shrink-0" />
-
-                        <div className="min-w-0 flex-1 pt-1">
-                          <h3 className="font-semibold text-base sm:text-lg truncate mb-1">{user.fullName}</h3>
+                      <div className="flex flex-col items-center text-center gap-2">
+                        <Avatar src={user.profilePic} alt={user.fullName} size="md" className="sm:!w-12 sm:!h-12 flex-shrink-0" />
+                        <div className="min-w-0 w-full">
+                          <h3 className="font-semibold text-sm sm:text-base truncate mb-1">{user.fullName}</h3>
                           {user.location && (
-                            <div className="flex items-center text-xs opacity-70">
+                            <div className="flex items-center justify-center text-xs opacity-70">
                               <MapPinIcon className="size-3 mr-1 flex-shrink-0" />
                               <span className="truncate">{user.location}</span>
                             </div>
@@ -128,27 +127,27 @@ const HomePage = () => {
                       </div>
 
                       {/* Language Badges */}
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        <span className="badge badge-secondary text-xs py-2">
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        <span className="badge badge-secondary text-xs py-1">
                           {getLanguageFlag(user.nativeLanguage)}
-                          <span className="ml-1">Native: {capitialize(user.nativeLanguage)}</span>
+                          <span className="ml-1 hidden sm:inline">Native: {capitialize(user.nativeLanguage)}</span>
                         </span>
-                        <span className="badge badge-outline text-xs py-2">
+                        <span className="badge badge-outline text-xs py-1">
                           {getLanguageFlag(user.learningLanguage)}
-                          <span className="ml-1">Learning: {capitialize(user.learningLanguage)}</span>
+                          <span className="ml-1 hidden sm:inline">Learning: {capitialize(user.learningLanguage)}</span>
                         </span>
                       </div>
 
                       {/* Bio */}
                       {user.bio && (
-                        <p className="text-xs sm:text-sm opacity-70 line-clamp-2 leading-relaxed pt-1">
+                        <p className="text-xs opacity-70 line-clamp-2 leading-relaxed text-center">
                           {user.bio}
                         </p>
                       )}
 
                       {/* Action Button */}
                       <button
-                        className={`btn w-full mt-3 h-11 min-h-11 sm:h-12 sm:min-h-12 text-sm sm:text-base ${
+                        className={`btn w-full mt-2 h-9 min-h-9 sm:h-10 sm:min-h-10 text-xs sm:text-sm ${
                           hasRequestBeenSent ? "btn-disabled" : "btn-primary"
                         }`}
                         onClick={() => sendRequestMutation(user._id)}
@@ -156,13 +155,13 @@ const HomePage = () => {
                       >
                         {hasRequestBeenSent ? (
                           <>
-                            <CheckCircleIcon className="size-4 mr-2" />
-                            <span>Request Sent</span>
+                            <CheckCircleIcon className="size-3 sm:size-4 mr-1" />
+                            <span>Sent</span>
                           </>
                         ) : (
                           <>
-                            <UserPlusIcon className="size-4 mr-2" />
-                            <span>Send Friend Request</span>
+                            <UserPlusIcon className="size-3 sm:size-4 mr-1" />
+                            <span>Add Friend</span>
                           </>
                         )}
                       </button>
