@@ -36,31 +36,48 @@
 - **Secure User Registration**: Create account with email and password validation
 - **Login/Logout**: JWT-based authentication with secure cookie storage
 - **User Profile Setup**: Comprehensive onboarding process with profile customization
+- **Profile Editing**: Edit your profile details including name, bio, languages, location, and profile picture
+- **Random Avatar Generator**: Generate random profile pictures during onboarding and profile editing
 - **Password Security**: Bcrypt encryption for secure password storage
 
 ### 👥 Social Features
-- **Friend Management**: Add and manage friends on the platform
-- **Friend Requests**: Send and accept friend requests
+- **Friend Management**: Add, view, and manage friends on the platform
+- **Remove Friends**: Unfriend users with a simple click and confirmation
+- **Friend Requests**: Send and accept friend requests with real-time updates
 - **User Recommendations**: Discover new language exchange partners based on your profile
 - **Notifications System**: Real-time notifications for friend requests and new connections
+- **Outgoing Requests Tracking**: See all friend requests you've sent
 
 ### 💬 Real-Time Communication
 - **Instant Messaging**: Real-time chat powered by Stream Chat
 - **Video Calling**: High-quality video calls using Stream Video SDK
 - **Chat History**: Persistent message history and conversation threads
 - **Online Status**: See when your friends are online
+- **One-on-One Chat**: Private messaging with individual friends
 
 ### 🎨 User Experience
 - **Responsive Design**: Fully responsive layout optimized for mobile, tablet, and desktop
-- **Theme Customization**: Multiple beautiful themes with dark mode support
-- **Modern UI**: Clean and intuitive interface built with Tailwind CSS and DaisyUI
 - **Mobile Navigation**: Hamburger menu and drawer navigation for mobile devices
+- **Theme Customization**: Multiple beautiful themes with dark mode support (30+ themes)
+- **Modern UI**: Clean and intuitive interface built with Tailwind CSS and DaisyUI
+- **Loading States**: Skeleton loaders and loading indicators for better UX
+- **Error Handling**: Graceful error handling with user-friendly messages
+- **Toast Notifications**: Beautiful toast notifications for user actions
 
 ### 🌍 Language Exchange Focus
 - **Language Profiles**: Set your native and learning languages
 - **Profile Customization**: Add bio, location, and profile pictures
 - **Smart Matching**: Find partners based on language preferences
+- **Language Badges**: Visual indicators showing native and learning languages with flag icons
 - **Community Building**: Connect with people worldwide for language learning
+
+### 📱 Pages & Navigation
+- **Dashboard/Home**: View your friends and discover new learners
+- **Friends Page**: Dedicated page to view all your friends
+- **Profile Page**: View and edit your profile information
+- **Notifications Page**: Manage friend requests and see activity
+- **Chat Page**: Real-time messaging interface
+- **Call Page**: Video calling interface
 
 ---
 
@@ -252,14 +269,18 @@ FriendNest/
 │   │   │   ├── Navbar.jsx
 │   │   │   ├── Sidebar.jsx
 │   │   │   ├── FriendCard.jsx
+│   │   │   ├── Avatar.jsx
 │   │   │   └── ...
 │   │   ├── pages/            # Page components
 │   │   │   ├── HomePage.jsx
 │   │   │   ├── LoginPage.jsx
 │   │   │   ├── SignUpPage.jsx
+│   │   │   ├── ProfilePage.jsx
+│   │   │   ├── FriendsPage.jsx
+│   │   │   ├── NotificationsPage.jsx
 │   │   │   ├── ChatPage.jsx
 │   │   │   ├── CallPage.jsx
-│   │   │   └── ...
+│   │   │   └── OnboardingPage.jsx
 │   │   ├── hooks/            # Custom React hooks
 │   │   ├── lib/              # Utilities
 │   │   │   ├── api.js
@@ -268,7 +289,12 @@ FriendNest/
 │   │   ├── constants/        # App constants
 │   │   ├── App.jsx
 │   │   └── main.jsx
-│   ├── public/
+│   ├── public/               # Static assets
+│   │   ├── Dashboard.png
+│   │   ├── FriendPage.png
+│   │   ├── User.png
+│   │   ├── SignIn.png
+│   │   └── SignUp.png
 │   ├── package.json
 │   └── .env
 │
@@ -281,41 +307,56 @@ FriendNest/
 
 ### Authentication & Onboarding
 
-![Authentication Features](https://via.placeholder.com/800x450/1F2937/FFFFFF?text=Authentication+%26+User+Onboarding)
+![Sign Up Page](./frontend/public/SignUp.png)
 
-**Secure login, registration, and comprehensive profile setup with language preferences and profile customization.**
-
----
-
-### Real-Time Chat & Messaging
-
-![Real-Time Chat](https://via.placeholder.com/800x450/1F2937/FFFFFF?text=Real-Time+Chat+%26+Messaging)
-
-**Instant messaging with persistent chat history, message threads, and seamless conversation experience powered by Stream Chat.**
+**Secure user registration with email validation and password requirements. Create your account and start your language learning journey.**
 
 ---
 
-### Video Calling
+![Sign In Page](./frontend/public/SignIn.png)
 
-![Video Calling](https://via.placeholder.com/800x450/1F2937/FFFFFF?text=Video+Calling)
-
-**High-quality video calls with screen sharing, audio/video controls, and real-time communication features.**
+**Simple and secure login interface with JWT-based authentication. Access your account with email and password.**
 
 ---
 
-### Friend Management & Social Features
+### Dashboard & Friend Management
 
-![Friend Management](https://via.placeholder.com/800x450/1F2937/FFFFFF?text=Friend+Management+%26+Social+Features)
+![Dashboard](./frontend/public/Dashboard.png)
 
-**Discover new friends, send and accept friend requests, manage your connections, and receive real-time notifications.**
+**Your Friends Section**: View all your friends with their language preferences, send messages, and manage connections. Each friend card displays their native and learning languages with flag icons.
+
+**Meet New Learners Section**: Discover potential language exchange partners based on your profile. Send friend requests to connect with new learners worldwide.
+
+**Features**:
+- Large, prominent friend cards with avatar, name, and language badges
+- Quick access to messaging with each friend
+- Remove friend functionality with confirmation
+- Compact learner cards showing recommendations
+- Responsive grid layout for all screen sizes
 
 ---
 
-### Responsive Design & Theme Customization
+![Friends Page](./frontend/public/FriendPage.png)
 
-![Responsive Design](https://via.placeholder.com/800x450/1F2937/FFFFFF?text=Responsive+Design+%26+Themes)
+**Dedicated friends page showing all your connections in a clean grid layout. Easy navigation to view and manage all your friends in one place.**
 
-**Fully responsive design that works beautifully on all devices with multiple theme options and dark mode support.**
+---
+
+### Profile Management
+
+![Profile Page](./frontend/public/User.png)
+
+**Comprehensive profile management page**:
+- **View Mode**: See your complete profile information including name, bio, languages, location, and account details
+- **Edit Mode**: Update your profile with:
+  - Full name editing
+  - Bio customization (500 character limit)
+  - Native and learning language selection
+  - Location updates
+  - Random avatar generator
+  - Profile picture updates
+- All changes are saved to the database and synced with Stream.io
+- Beautiful, responsive design with form validation
 
 ---
 
@@ -353,4 +394,3 @@ This project is licensed under the ISC License.
 [Report Bug](https://github.com/yourusername/FriendNest/issues) · [Request Feature](https://github.com/yourusername/FriendNest/issues) · [Documentation](https://github.com/yourusername/FriendNest/wiki)
 
 </div>
-
