@@ -1,16 +1,30 @@
-import Sidebar from "./Sidebar";
+import { useState } from "react";
+import Sidebar, { MobileSidebar } from "./Sidebar";
 import Navbar from "./Navbar";
 
 const Layout = ({ children, showSidebar = false }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
-    <div className="min-h-screen">
-      <div className="flex">
-        {showSidebar && <Sidebar />}
+    <div className="min-h-screen relative">
+      <input id="mobile-drawer" type="checkbox" className="drawer-toggle hidden" checked={isMobileMenuOpen} readOnly />
+      
+      <div className="min-h-screen">
+        <div className="flex">
+          {showSidebar && (
+            <>
+              {/* Desktop Sidebar */}
+              <Sidebar />
+              {/* Mobile Sidebar */}
+              <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+            </>
+          )}
 
-        <div className="flex-1 flex flex-col">
-          <Navbar />
+          <div className="flex-1 flex flex-col">
+            <Navbar onMenuClick={showSidebar ? () => setIsMobileMenuOpen(!isMobileMenuOpen) : undefined} />
 
-          <main className="flex-1 overflow-y-auto">{children}</main>
+            <main className="flex-1 overflow-y-auto">{children}</main>
+          </div>
         </div>
       </div>
     </div>

@@ -7,14 +7,14 @@ const ThemeSelector = () => {
 
   return (
     <div className="dropdown dropdown-end">
-      <button tabIndex={0} className="btn btn-ghost btn-circle">
-        <PaletteIcon className="size-5" />
+      <button tabIndex={0} className="btn btn-ghost btn-circle h-10 w-10 min-h-10 sm:h-12 sm:w-12 sm:min-h-12">
+        <PaletteIcon className="size-5 sm:size-6" />
       </button>
 
       <div
         tabIndex={0}
         className="dropdown-content mt-2 p-1 shadow-2xl bg-base-200 backdrop-blur-lg rounded-2xl
-        w-56 border border-base-content/10 max-h-80 overflow-y-auto"
+        w-56 border border-base-content/10 max-h-80 overflow-y-auto z-50"
       >
         <div className="space-y-1">
           {THEMES.map((themeOption) => (

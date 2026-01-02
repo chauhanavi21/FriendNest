@@ -116,15 +116,45 @@ export async function acceptFriendRequest(req, res) {
 
 export async function getFriendRequests(req, res) {
   try {
+    const currentUserId = req.user.id;
+
+    // Get incoming pending requests
     const incomingReqs = await FriendRequest.find({
-      recipient: req.user.id,
+      recipient: currentUserId,
       status: "pending",
     }).populate("sender", "fullName profilePic nativeLanguage learningLanguage");
 
-    const acceptedReqs = await FriendRequest.find({
-      sender: req.user.id,
+    // Get accepted requests where current user is the sender (they sent the request)
+    const acceptedReqsAsSender = await FriendRequest.find({
+      sender: currentUserId,
       status: "accepted",
-    }).populate("recipient", "fullName profilePic");
+    })
+      .populate("recipient", "fullName profilePic")
+      .sort({ updatedAt: -1 })
+      .limit(10);
+
+    // Get accepted requests where current user is the recipient (they accepted the request)
+    const acceptedReqsAsRecipient = await FriendRequest.find({
+      recipient: currentUserId,
+      status: "accepted",
+    })
+      .populate("sender", "fullName profilePic")
+      .sort({ updatedAt: -1 })
+      .limit(10);
+
+    // Combine and format accepted requests with role information
+    const acceptedReqs = [
+      ...acceptedReqsAsSender.map((req) => ({
+        ...req.toObject(),
+        otherUser: req.recipient,
+        role: "sender", // Current user sent the request
+      })),
+      ...acceptedReqsAsRecipient.map((req) => ({
+        ...req.toObject(),
+        otherUser: req.sender,
+        role: "recipient", // Current user accepted the request
+      })),
+    ].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
     res.status(200).json({ incomingReqs, acceptedReqs });
   } catch (error) {

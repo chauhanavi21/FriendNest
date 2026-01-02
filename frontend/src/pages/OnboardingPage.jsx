@@ -46,16 +46,16 @@ const OnboardingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-base-100 flex items-center justify-center p-3 sm:p-4 md:p-6">
       <div className="card bg-base-200 w-full max-w-3xl shadow-xl">
-        <div className="card-body p-6 sm:p-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">Complete Your Profile</h1>
+        <div className="card-body p-4 sm:p-6 md:p-8">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center mb-4 sm:mb-6">Complete Your Profile</h1>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             
-            <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4">
               
-              <div className="size-32 rounded-full bg-base-300 overflow-hidden">
+              <div className="size-24 sm:size-28 md:size-32 rounded-full bg-base-300 overflow-hidden flex-shrink-0">
                 {formState.profilePic ? (
                   <img
                     src={formState.profilePic}
@@ -64,14 +64,14 @@ const OnboardingPage = () => {
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <CameraIcon className="size-12 text-base-content opacity-40" />
+                    <ShipWheelIcon className="size-8 sm:size-10 md:size-12 text-base-content opacity-40" />
                   </div>
                 )}
               </div>
 
               
-              <div className="flex items-center gap-2">
-                <button type="button" onClick={handleRandomAvatar} className="btn btn-accent">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button type="button" onClick={handleRandomAvatar} className="btn btn-accent w-full sm:w-auto h-10 sm:h-12 min-h-10 sm:min-h-12 text-sm sm:text-base">
                   <ShuffleIcon className="size-4 mr-2" />
                   Generate Random Avatar
                 </button>
@@ -80,29 +80,29 @@ const OnboardingPage = () => {
 
             
             <div className="form-control">
-              <label className="label">
-                <span className="label-text">Full Name</span>
+              <label className="label py-1 sm:py-2">
+                <span className="label-text text-sm sm:text-base">Full Name</span>
               </label>
               <input
                 type="text"
                 name="fullName"
                 value={formState.fullName}
                 onChange={(e) => setFormState({ ...formState, fullName: e.target.value })}
-                className="input input-bordered w-full"
+                className="input input-bordered w-full h-11 sm:h-12 text-sm sm:text-base"
                 placeholder="Your full name"
               />
             </div>
 
             
             <div className="form-control">
-              <label className="label">
-                <span className="label-text">Bio</span>
+              <label className="label py-1 sm:py-2">
+                <span className="label-text text-sm sm:text-base">Bio</span>
               </label>
               <textarea
                 name="bio"
                 value={formState.bio}
                 onChange={(e) => setFormState({ ...formState, bio: e.target.value })}
-                className="textarea textarea-bordered h-24"
+                className="textarea textarea-bordered h-20 sm:h-24 text-sm sm:text-base"
                 placeholder="Tell others about yourself and your language learning goals"
               />
             </div>
@@ -111,14 +111,14 @@ const OnboardingPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Native Language</span>
+                <label className="label py-1 sm:py-2">
+                  <span className="label-text text-sm sm:text-base">Native Language</span>
                 </label>
                 <select
                   name="nativeLanguage"
                   value={formState.nativeLanguage}
                   onChange={(e) => setFormState({ ...formState, nativeLanguage: e.target.value })}
-                  className="select select-bordered w-full"
+                  className="select select-bordered w-full h-11 sm:h-12 text-sm sm:text-base"
                 >
                   <option value="">Select your native language</option>
                   {LANGUAGES.map((lang) => (
@@ -131,14 +131,14 @@ const OnboardingPage = () => {
 
               
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Learning Language</span>
+                <label className="label py-1 sm:py-2">
+                  <span className="label-text text-sm sm:text-base">Learning Language</span>
                 </label>
                 <select
                   name="learningLanguage"
                   value={formState.learningLanguage}
                   onChange={(e) => setFormState({ ...formState, learningLanguage: e.target.value })}
-                  className="select select-bordered w-full"
+                  className="select select-bordered w-full h-11 sm:h-12 text-sm sm:text-base"
                 >
                   <option value="">Select language you're learning</option>
                   {LANGUAGES.map((lang) => (
@@ -152,24 +152,24 @@ const OnboardingPage = () => {
 
             
             <div className="form-control">
-              <label className="label">
-                <span className="label-text">Location</span>
+              <label className="label py-1 sm:py-2">
+                <span className="label-text text-sm sm:text-base">Location</span>
               </label>
               <div className="relative">
-                <MapPinIcon className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
+                <MapPinIcon className="absolute top-1/2 transform -translate-y-1/2 left-3 size-4 sm:size-5 text-base-content opacity-70" />
                 <input
                   type="text"
                   name="location"
                   value={formState.location}
                   onChange={(e) => setFormState({ ...formState, location: e.target.value })}
-                  className="input input-bordered w-full pl-10"
+                  className="input input-bordered w-full pl-10 sm:pl-12 h-11 sm:h-12 text-sm sm:text-base"
                   placeholder="City, Country"
                 />
               </div>
             </div>
 
 
-            <button className="btn btn-primary w-full" disabled={isPending} type="submit">
+            <button className="btn btn-primary w-full h-11 sm:h-12 min-h-11 sm:min-h-12 text-sm sm:text-base mt-2" disabled={isPending} type="submit">
               {!isPending ? (
                 <>
                   <ShipWheelIcon className="size-5 mr-2" />
