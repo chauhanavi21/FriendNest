@@ -4,26 +4,31 @@ import Avatar from "./Avatar";
 
 const FriendCard = ({ friend }) => {
   return (
-    <div className="card bg-base-200 hover:shadow-md transition-shadow">
-      <div className="card-body p-3 sm:p-4">
+    <div className="card bg-base-200 hover:shadow-md transition-shadow border border-base-300">
+      <div className="card-body p-4 sm:p-5">
         {/* USER INFO */}
-        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-          <Avatar src={friend.profilePic} alt={friend.fullName} size="md" className="sm:!w-12 sm:!h-12" />
-          <h3 className="font-semibold text-sm sm:text-base truncate flex-1 min-w-0">{friend.fullName}</h3>
+        <div className="flex items-center gap-3 mb-3 sm:mb-4">
+          <Avatar src={friend.profilePic} alt={friend.fullName} size="md" className="sm:!w-12 sm:!h-12 flex-shrink-0" />
+          <h3 className="font-semibold text-base sm:text-lg truncate flex-1 min-w-0">{friend.fullName}</h3>
         </div>
 
-        <div className="flex flex-wrap gap-1.5 mb-2 sm:mb-3">
-          <span className="badge badge-secondary text-xs">
+        {/* Language Badges */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          <span className="badge badge-secondary text-xs py-1.5">
             {getLanguageFlag(friend.nativeLanguage)}
-            Native: {friend.nativeLanguage}
+            <span className="ml-1">Native: {friend.nativeLanguage}</span>
           </span>
-          <span className="badge badge-outline text-xs">
+          <span className="badge badge-outline text-xs py-1.5">
             {getLanguageFlag(friend.learningLanguage)}
-            Learning: {friend.learningLanguage}
+            <span className="ml-1">Learning: {friend.learningLanguage}</span>
           </span>
         </div>
 
-        <Link to={`/chat/${friend._id}`} className="btn btn-outline w-full h-10 min-h-10 sm:h-12 sm:min-h-12 text-sm sm:text-base">
+        {/* Message Button */}
+        <Link 
+          to={`/chat/${friend._id}`} 
+          className="btn btn-outline w-full h-11 min-h-11 sm:h-12 sm:min-h-12 text-sm sm:text-base"
+        >
           Message
         </Link>
       </div>

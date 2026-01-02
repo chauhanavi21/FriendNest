@@ -50,71 +50,76 @@ const HomePage = () => {
   }, [outgoingFriendReqs]);
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-      <div className="container mx-auto space-y-6 sm:space-y-8 lg:space-y-10 max-w-7xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">Your Friends</h2>
-          <Link to="/notifications" className="btn btn-outline btn-sm w-full sm:w-auto">
+    <div className="p-4 sm:p-5 md:p-6 lg:p-8 pb-6 sm:pb-8 bg-base-100 min-h-full relative">
+      <div className="container mx-auto space-y-5 sm:space-y-6 md:space-y-8 lg:space-y-10 max-w-7xl relative z-0">
+        {/* Your Friends Section Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-2xl sm:text-2xl lg:text-3xl font-bold tracking-tight">Your Friends</h2>
+          <Link to="/notifications" className="btn btn-outline btn-sm w-full sm:w-auto justify-center">
             <UsersIcon className="mr-2 size-4" />
-            Friend Requests
+            <span>Friend Requests</span>
           </Link>
         </div>
 
+        {/* Friends List */}
         {loadingFriends ? (
-          <div className="flex justify-center py-12">
+          <div className="flex justify-center py-8 sm:py-12">
             <span className="loading loading-spinner loading-lg" />
           </div>
         ) : friends.length === 0 ? (
           <NoFriendsFound />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-              {friends.map((friend) => (
-                <FriendCard key={friend._id} friend={friend} />
-              ))}
-            </div>
-          )}
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-4 lg:gap-5">
+            {friends.map((friend) => (
+              <FriendCard key={friend._id} friend={friend} />
+            ))}
+          </div>
+        )}
 
-        <section>
-          <div className="mb-4 sm:mb-6 lg:mb-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-              <div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">Meet New Learners</h2>
-                <p className="text-sm sm:text-base opacity-70 mt-1">
-                  Discover perfect language exchange partners based on your profile
-                </p>
-              </div>
+        {/* Divider */}
+        <div className="divider my-6 sm:my-8 lg:my-10"></div>
+
+        {/* Meet New Learners Section */}
+        <section className="relative z-10">
+          <div className="mb-5 sm:mb-6 lg:mb-8">
+            <div className="space-y-2">
+              <h2 className="text-2xl sm:text-2xl lg:text-3xl font-bold tracking-tight">Meet New Learners</h2>
+              <p className="text-sm sm:text-base opacity-70 leading-relaxed">
+                Discover perfect language exchange partners based on your profile
+              </p>
             </div>
           </div>
 
           {loadingUsers ? (
-            <div className="flex justify-center py-12">
+            <div className="flex justify-center py-8 sm:py-12">
               <span className="loading loading-spinner loading-lg" />
             </div>
           ) : recommendedUsers.length === 0 ? (
-            <div className="card bg-base-200 p-6 text-center">
-              <h3 className="font-semibold text-lg mb-2">No recommendations available</h3>
-              <p className="text-base-content opacity-70">
+            <div className="card bg-base-200 p-6 sm:p-8 text-center border border-base-300 shadow-sm">
+              <h3 className="font-semibold text-base sm:text-lg mb-2">No recommendations available</h3>
+              <p className="text-sm sm:text-base text-base-content opacity-70">
                 Check back later for new language partners!
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
               {recommendedUsers.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
 
                 return (
                   <div
                     key={user._id}
-                    className="card bg-base-200 hover:shadow-lg transition-all duration-300"
+                    className="card bg-base-200 hover:shadow-lg transition-all duration-300 border border-base-300 shadow-sm relative z-10"
                   >
                     <div className="card-body p-4 sm:p-5 space-y-3 sm:space-y-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar src={user.profilePic} alt={user.fullName} size="lg" className="sm:!w-14 sm:!h-14 lg:!w-16 lg:!h-16" />
+                      {/* User Info */}
+                      <div className="flex items-start gap-3">
+                        <Avatar src={user.profilePic} alt={user.fullName} size="lg" className="sm:!w-14 sm:!h-14 lg:!w-16 lg:!h-16 flex-shrink-0" />
 
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold text-base sm:text-lg truncate">{user.fullName}</h3>
+                        <div className="min-w-0 flex-1 pt-1">
+                          <h3 className="font-semibold text-base sm:text-lg truncate mb-1">{user.fullName}</h3>
                           {user.location && (
-                            <div className="flex items-center text-xs opacity-70 mt-1">
+                            <div className="flex items-center text-xs opacity-70">
                               <MapPinIcon className="size-3 mr-1 flex-shrink-0" />
                               <span className="truncate">{user.location}</span>
                             </div>
@@ -122,35 +127,42 @@ const HomePage = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-1.5">
-                        <span className="badge badge-secondary text-xs">
+                      {/* Language Badges */}
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        <span className="badge badge-secondary text-xs py-2">
                           {getLanguageFlag(user.nativeLanguage)}
-                          Native: {capitialize(user.nativeLanguage)}
+                          <span className="ml-1">Native: {capitialize(user.nativeLanguage)}</span>
                         </span>
-                        <span className="badge badge-outline text-xs">
+                        <span className="badge badge-outline text-xs py-2">
                           {getLanguageFlag(user.learningLanguage)}
-                          Learning: {capitialize(user.learningLanguage)}
+                          <span className="ml-1">Learning: {capitialize(user.learningLanguage)}</span>
                         </span>
                       </div>
 
-                      {user.bio && <p className="text-xs sm:text-sm opacity-70 line-clamp-2">{user.bio}</p>}
+                      {/* Bio */}
+                      {user.bio && (
+                        <p className="text-xs sm:text-sm opacity-70 line-clamp-2 leading-relaxed pt-1">
+                          {user.bio}
+                        </p>
+                      )}
 
+                      {/* Action Button */}
                       <button
-                        className={`btn w-full mt-2 h-10 min-h-10 sm:h-12 sm:min-h-12 ${
+                        className={`btn w-full mt-3 h-11 min-h-11 sm:h-12 sm:min-h-12 text-sm sm:text-base ${
                           hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        } `}
+                        }`}
                         onClick={() => sendRequestMutation(user._id)}
                         disabled={hasRequestBeenSent || isPending}
                       >
                         {hasRequestBeenSent ? (
                           <>
                             <CheckCircleIcon className="size-4 mr-2" />
-                            <span className="text-sm sm:text-base">Request Sent</span>
+                            <span>Request Sent</span>
                           </>
                         ) : (
                           <>
                             <UserPlusIcon className="size-4 mr-2" />
-                            <span className="text-sm sm:text-base">Send Friend Request</span>
+                            <span>Send Friend Request</span>
                           </>
                         )}
                       </button>
