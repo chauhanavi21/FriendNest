@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, XIcon, SearchIcon, SettingsIcon } from "lucide-react";
+import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, XIcon, SearchIcon, SettingsIcon, MessageSquareIcon } from "lucide-react";
 import Avatar from "./Avatar";
 
 const Sidebar = () => {
@@ -48,6 +48,16 @@ const Sidebar = () => {
         >
           <SearchIcon className="size-5 text-base-content opacity-70" />
           <span>Search</span>
+        </Link>
+
+        <Link
+          to="/chatroom"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+            currentPath === "/chatroom" ? "btn-active" : ""
+          }`}
+        >
+          <MessageSquareIcon className="size-5 text-base-content opacity-70" />
+          <span>Chatroom</span>
         </Link>
 
         <Link
@@ -142,6 +152,17 @@ export const MobileSidebar = ({ isOpen, onClose }) => {
           >
             <SearchIcon className="size-5 text-base-content opacity-70" />
             <span>Search</span>
+          </Link>
+
+          <Link
+            to="/chatroom"
+            className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+              currentPath === "/chatroom" ? "btn-active" : ""
+            }`}
+            onClick={onClose}
+          >
+            <MessageSquareIcon className="size-5 text-base-content opacity-70" />
+            <span>Chatroom</span>
           </Link>
 
           <Link

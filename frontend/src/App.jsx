@@ -11,6 +11,7 @@ import FriendsPage from "./pages/FriendsPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
+import ChatRoomPage from "./pages/ChatRoomPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -126,6 +127,18 @@ const App = () => {
           }
         />
 
+        <Route
+          path="/chatroom"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <ChatRoomPage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
         <Route
           path="/chat/:id"
           element={
