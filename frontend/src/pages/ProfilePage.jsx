@@ -1,15 +1,20 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { updateProfile } from "../lib/api";
+import { updateProfile, getUserFriends } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
-import { LoaderIcon, MapPinIcon, ShipWheelIcon, ShuffleIcon, UserIcon } from "lucide-react";
+import { LoaderIcon, MapPinIcon, ShipWheelIcon, ShuffleIcon, UserIcon, UsersIcon, ClockIcon } from "lucide-react";
 import { LANGUAGES } from "../constants";
 import Avatar from "../components/Avatar";
 
 const ProfilePage = () => {
   const { authUser } = useAuthUser();
   const queryClient = useQueryClient();
+
+  const { data: friends = [] } = useQuery({
+    queryKey: ["friends"],
+    queryFn: getUserFriends,
+  });
 
   const [formState, setFormState] = useState({
     fullName: authUser?.fullName || "",
@@ -21,6 +26,24 @@ const ProfilePage = () => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
+
+  const getLastActiveText = (updatedAt) => {
+    if (!updatedAt) return "Never";
+    
+    const now = new Date();
+    const lastActive = new Date(updatedAt);
+    const diffMs = now - lastActive;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 5) return "Online";
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+    
+    return lastActive.toLocaleDateString();
+  };
 
   const { mutate: updateProfileMutation, isPending } = useMutation({
     mutationFn: updateProfile,
@@ -270,6 +293,22 @@ const ProfilePage = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm sm:text-base opacity-70">Email</span>
                       <span className="text-sm sm:text-base font-medium">{authUser.email}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm sm:text-base opacity-70">Friends</span>
+                      <span className="text-sm sm:text-base font-medium flex items-center gap-1">
+                        <UsersIcon className="size-4" />
+                        {friends.length}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm sm:text-base opacity-70 flex items-center gap-1">
+                        <ClockIcon className="size-4" />
+                        Last Active
+                      </span>
+                      <span className="text-sm sm:text-base font-medium">
+                        {getLastActiveText(authUser.updatedAt)}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm sm:text-base opacity-70">Member since</span>
