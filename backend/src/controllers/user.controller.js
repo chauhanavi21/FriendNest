@@ -59,6 +59,24 @@ export async function sendFriendRequest(req, res) {
       return res.status(400).json({ message: "You are already friends with this user" });
     }
 
+    // Check recipient's privacy settings for friend requests
+    const recipientPrivacy = recipient.settings?.privacy?.whoCanSendFriendRequests || "everyone";
+    if (recipientPrivacy === "nobody") {
+      return res.status(403).json({ message: "This user does not accept friend requests" });
+    }
+    if (recipientPrivacy === "friendsOfFriends") {
+      // Check if sender is a friend of any of recipient's friends
+      const recipientFriends = await User.findById(recipientId).select("friends").populate("friends");
+      const recipientFriendsIds = recipientFriends.friends.map((f) => f._id.toString());
+      const senderFriends = await User.findById(myId).select("friends");
+      const senderFriendsIds = senderFriends.friends.map((f) => f.toString());
+      
+      const hasMutualFriend = recipientFriendsIds.some((friendId) => senderFriendsIds.includes(friendId));
+      if (!hasMutualFriend) {
+        return res.status(403).json({ message: "This user only accepts friend requests from friends of friends" });
+      }
+    }
+
     // check if a req already exists (only pending or accepted, not removed)
     const existingRequest = await FriendRequest.findOne({
       $or: [
@@ -385,6 +403,142 @@ export async function searchUsers(req, res) {
     res.status(200).json(users);
   } catch (error) {
     console.error("Error in searchUsers controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function updateEmail(req, res) {
+  try {
+    const userId = req.user.id;
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isPasswordCorrect = await user.matchPassword(password);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== userId) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    user.email = email;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Email updated successfully", user });
+  } catch (error) {
+    console.error("Error in updateEmail controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function updatePassword(req, res) {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current password and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isPasswordCorrect = await user.matchPassword(currentPassword);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error in updatePassword controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function updateSettings(req, res) {
+  try {
+    const userId = req.user.id;
+    const { privacy, notifications, language } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (privacy) {
+      user.settings = user.settings || {};
+      user.settings.privacy = { ...user.settings.privacy, ...privacy };
+    }
+    if (notifications) {
+      user.settings = user.settings || {};
+      user.settings.notifications = { ...user.settings.notifications, ...notifications };
+    }
+    if (language) {
+      user.settings = user.settings || {};
+      user.settings.language = { ...user.settings.language, ...language };
+    }
+
+    await user.save();
+
+    const updatedUser = await User.findById(userId).select("-password");
+
+    res.status(200).json({ success: true, message: "Settings updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Error in updateSettings controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function deleteAccount(req, res) {
+  try {
+    const userId = req.user.id;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: "Password is required to delete account" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isPasswordCorrect = await user.matchPassword(password);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    res.clearCookie("jwt");
+
+    res.status(200).json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteAccount controller:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

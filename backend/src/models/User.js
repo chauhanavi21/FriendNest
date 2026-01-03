@@ -47,6 +47,39 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    settings: {
+      privacy: {
+        whoCanSendFriendRequests: {
+          type: String,
+          enum: ["everyone", "friendsOfFriends", "nobody"],
+          default: "everyone",
+        },
+      },
+      notifications: {
+        friendRequests: {
+          type: Boolean,
+          default: true,
+        },
+        friendAcceptances: {
+          type: Boolean,
+          default: true,
+        },
+        friendRemovals: {
+          type: Boolean,
+          default: true,
+        },
+        messages: {
+          type: Boolean,
+          default: true,
+        },
+      },
+      language: {
+        preferredLanguage: {
+          type: String,
+          default: "en",
+        },
+      },
+    },
   },
   { timestamps: true }
 );

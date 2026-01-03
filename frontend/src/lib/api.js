@@ -85,3 +85,23 @@ export async function searchUsers(params) {
   const response = await axiosInstance.get(`/users/search?${queryParams.toString()}`);
   return response.data;
 }
+
+export async function updateEmail(emailData) {
+  const response = await axiosInstance.put("/users/settings/email", emailData);
+  return response.data;
+}
+
+export async function updatePassword(passwordData) {
+  const response = await axiosInstance.put("/users/settings/password", passwordData);
+  return response.data;
+}
+
+export async function updateSettings(settingsData) {
+  const response = await axiosInstance.put("/users/settings", settingsData);
+  return response.data;
+}
+
+export async function deleteAccount(password) {
+  const response = await axiosInstance.delete("/users/account", { data: { password } });
+  return response.data;
+}

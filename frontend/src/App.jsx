@@ -10,6 +10,7 @@ import OnboardingPage from "./pages/OnboardingPage.jsx";
 import FriendsPage from "./pages/FriendsPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -84,6 +85,18 @@ const App = () => {
             isAuthenticated && isOnboarded ? (
               <Layout showSidebar={true}>
                 <SearchPage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <SettingsPage />
               </Layout>
             ) : (
               <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

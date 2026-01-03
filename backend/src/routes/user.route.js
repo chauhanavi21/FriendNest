@@ -2,6 +2,7 @@ import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import {
   acceptFriendRequest,
+  deleteAccount,
   getFriendRequests,
   getMyFriends,
   getOutgoingFriendReqs,
@@ -9,7 +10,10 @@ import {
   removeFriend,
   searchUsers,
   sendFriendRequest,
+  updateEmail,
+  updatePassword,
   updateProfile,
+  updateSettings,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -28,5 +32,10 @@ router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
 
 router.put("/profile", updateProfile);
 router.delete("/friends/:id", removeFriend);
+
+router.put("/settings/email", updateEmail);
+router.put("/settings/password", updatePassword);
+router.put("/settings", updateSettings);
+router.delete("/account", deleteAccount);
 
 export default router;

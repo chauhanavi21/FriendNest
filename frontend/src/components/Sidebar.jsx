@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, XIcon, SearchIcon } from "lucide-react";
+import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, XIcon, SearchIcon, SettingsIcon } from "lucide-react";
 import Avatar from "./Avatar";
 
 const Sidebar = () => {
@@ -58,6 +58,16 @@ const Sidebar = () => {
         >
           <BellIcon className="size-5 text-base-content opacity-70" />
           <span>Notifications</span>
+        </Link>
+
+        <Link
+          to="/settings"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+            currentPath === "/settings" ? "btn-active" : ""
+          }`}
+        >
+          <SettingsIcon className="size-5 text-base-content opacity-70" />
+          <span>Settings</span>
         </Link>
       </nav>
 
@@ -143,6 +153,17 @@ export const MobileSidebar = ({ isOpen, onClose }) => {
           >
             <BellIcon className="size-5 text-base-content opacity-70" />
             <span>Notifications</span>
+          </Link>
+
+          <Link
+            to="/settings"
+            className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+              currentPath === "/settings" ? "btn-active" : ""
+            }`}
+            onClick={onClose}
+          >
+            <SettingsIcon className="size-5 text-base-content opacity-70" />
+            <span>Settings</span>
           </Link>
         </nav>
 
