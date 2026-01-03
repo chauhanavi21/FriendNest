@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { searchUsers, getOutgoingFriendReqs, sendFriendRequest } from "../lib/api";
-import { SearchIcon, MapPinIcon, UserPlusIcon, CheckCircleIcon, FilterIcon } from "lucide-react";
+import { SearchIcon, MapPinIcon, UserPlusIcon, CheckCircleIcon, FilterIcon, MessageSquareIcon } from "lucide-react";
+import { Link } from "react-router";
 import { LANGUAGES } from "../constants";
 import { capitialize } from "../lib/utils";
 import { getLanguageFlag } from "../components/FriendCard";
@@ -34,6 +35,14 @@ const SearchPage = () => {
     queryFn: getOutgoingFriendReqs,
   });
 
+  const { data: friends = [] } = useQuery({
+    queryKey: ["friends"],
+    queryFn: async () => {
+      const { getUserFriends } = await import("../lib/api");
+      return getUserFriends();
+    },
+  });
+
   useEffect(() => {
     if (outgoingFriendReqs && outgoingFriendReqs.length > 0) {
       const outgoingIds = new Set();
@@ -43,6 +52,8 @@ const SearchPage = () => {
       setOutgoingRequestsIds(outgoingIds);
     }
   }, [outgoingFriendReqs]);
+
+  const friendsIds = new Set(friends.map((friend) => friend._id));
 
   const { mutate: sendRequestMutation, isPending } = useMutation({
     mutationFn: sendFriendRequest,
@@ -202,6 +213,7 @@ const SearchPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
               {users.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
+                const isAlreadyFriend = friendsIds.has(user._id);
 
                 return (
                   <div
@@ -217,6 +229,11 @@ const SearchPage = () => {
                             <div className="flex items-center justify-center text-xs opacity-70">
                               <MapPinIcon className="size-3 mr-1 flex-shrink-0" />
                               <span className="truncate">{user.location}</span>
+                            </div>
+                          )}
+                          {isAlreadyFriend && (
+                            <div className="mt-1">
+                              <span className="badge badge-success badge-sm">Already Friend</span>
                             </div>
                           )}
                         </div>
@@ -243,25 +260,35 @@ const SearchPage = () => {
                         </p>
                       )}
 
-                      <button
-                        className={`btn w-full h-10 min-h-10 sm:h-11 sm:min-h-11 text-xs sm:text-sm ${
-                          hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        }`}
-                        onClick={() => handleSendRequest(user._id)}
-                        disabled={hasRequestBeenSent || isPending}
-                      >
-                        {hasRequestBeenSent ? (
-                          <>
-                            <CheckCircleIcon className="size-3 sm:size-4 mr-1" />
-                            <span>Request Sent</span>
-                          </>
-                        ) : (
-                          <>
-                            <UserPlusIcon className="size-3 sm:size-4 mr-1" />
-                            <span>Add Friend</span>
-                          </>
-                        )}
-                      </button>
+                      {isAlreadyFriend ? (
+                        <Link
+                          to={`/chat/${user._id}`}
+                          className="btn btn-outline w-full h-10 min-h-10 sm:h-11 sm:min-h-11 text-xs sm:text-sm"
+                        >
+                          <MessageSquareIcon className="size-3 sm:size-4 mr-1" />
+                          <span>Send Message</span>
+                        </Link>
+                      ) : (
+                        <button
+                          className={`btn w-full h-10 min-h-10 sm:h-11 sm:min-h-11 text-xs sm:text-sm ${
+                            hasRequestBeenSent ? "btn-disabled" : "btn-primary"
+                          }`}
+                          onClick={() => handleSendRequest(user._id)}
+                          disabled={hasRequestBeenSent || isPending}
+                        >
+                          {hasRequestBeenSent ? (
+                            <>
+                              <CheckCircleIcon className="size-3 sm:size-4 mr-1" />
+                              <span>Request Sent</span>
+                            </>
+                          ) : (
+                            <>
+                              <UserPlusIcon className="size-3 sm:size-4 mr-1" />
+                              <span>Add Friend</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
