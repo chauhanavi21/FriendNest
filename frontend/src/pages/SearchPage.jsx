@@ -43,6 +43,8 @@ const SearchPage = () => {
     },
   });
 
+  const friendsIds = new Set(friends.map((friend) => friend._id));
+
   useEffect(() => {
     if (outgoingFriendReqs && outgoingFriendReqs.length > 0) {
       const outgoingIds = new Set();
@@ -52,8 +54,6 @@ const SearchPage = () => {
       setOutgoingRequestsIds(outgoingIds);
     }
   }, [outgoingFriendReqs]);
-
-  const friendsIds = new Set(friends.map((friend) => friend._id));
 
   const { mutate: sendRequestMutation, isPending } = useMutation({
     mutationFn: sendFriendRequest,

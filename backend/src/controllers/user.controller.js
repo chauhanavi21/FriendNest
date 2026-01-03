@@ -300,10 +300,10 @@ export async function searchUsers(req, res) {
     } = req.query;
 
     // Build the search filter
+    // Include all users except current user (including friends)
     const filter = {
       $and: [
         { _id: { $ne: currentUserId } },
-        { _id: { $nin: currentUser.friends } },
         { isOnboarded: true },
       ],
     };
