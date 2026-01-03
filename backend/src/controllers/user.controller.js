@@ -48,23 +48,32 @@ export async function sendFriendRequest(req, res) {
       return res.status(404).json({ message: "Recipient not found" });
     }
 
-    // check if user is already friends
-    if (recipient.friends.includes(myId)) {
+    // Get current user to check friends array
+    const currentUser = await User.findById(myId);
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // check if users are already friends (check both arrays for safety)
+    if (currentUser.friends.includes(recipientId) || recipient.friends.includes(myId)) {
       return res.status(400).json({ message: "You are already friends with this user" });
     }
 
-    // check if a req already exists
+    // check if a req already exists (only pending or accepted, not removed)
     const existingRequest = await FriendRequest.findOne({
       $or: [
-        { sender: myId, recipient: recipientId },
-        { sender: recipientId, recipient: myId },
+        { sender: myId, recipient: recipientId, status: { $in: ["pending", "accepted"] } },
+        { sender: recipientId, recipient: myId, status: { $in: ["pending", "accepted"] } },
       ],
     });
 
     if (existingRequest) {
-      return res
-        .status(400)
-        .json({ message: "A friend request already exists between you and this user" });
+      if (existingRequest.status === "pending") {
+        return res.status(400).json({ message: "A friend request already exists between you and this user" });
+      }
+      if (existingRequest.status === "accepted") {
+        return res.status(400).json({ message: "You are already friends with this user" });
+      }
     }
 
     const friendRequest = await FriendRequest.create({
