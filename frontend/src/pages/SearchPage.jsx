@@ -1,13 +1,15 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { searchUsers } from "../lib/api";
-import { SearchIcon, MapPinIcon, UserPlusIcon, CheckCircleIcon, FilterIcon, SortAscIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { searchUsers, getOutgoingFriendReqs, sendFriendRequest } from "../lib/api";
+import { SearchIcon, MapPinIcon, UserPlusIcon, CheckCircleIcon, FilterIcon } from "lucide-react";
 import { LANGUAGES } from "../constants";
 import { capitialize } from "../lib/utils";
 import { getLanguageFlag } from "../components/FriendCard";
 import Avatar from "../components/Avatar";
 
 const SearchPage = () => {
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [nativeLanguage, setNativeLanguage] = useState("");
   const [learningLanguage, setLearningLanguage] = useState("");
@@ -25,18 +27,14 @@ const SearchPage = () => {
         location,
         sortBy,
       }),
-    enabled: true,
   });
 
   const { data: outgoingFriendReqs } = useQuery({
     queryKey: ["outgoingFriendReqs"],
-    queryFn: async () => {
-      const { getOutgoingFriendReqs } = await import("../lib/api");
-      return getOutgoingFriendReqs();
-    },
+    queryFn: getOutgoingFriendReqs,
   });
 
-  useState(() => {
+  useEffect(() => {
     if (outgoingFriendReqs && outgoingFriendReqs.length > 0) {
       const outgoingIds = new Set();
       outgoingFriendReqs.forEach((req) => {
@@ -45,6 +43,22 @@ const SearchPage = () => {
       setOutgoingRequestsIds(outgoingIds);
     }
   }, [outgoingFriendReqs]);
+
+  const { mutate: sendRequestMutation, isPending } = useMutation({
+    mutationFn: sendFriendRequest,
+    onSuccess: () => {
+      toast.success("Friend request sent!");
+      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] });
+      queryClient.invalidateQueries({ queryKey: ["searchUsers"] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to send friend request");
+    },
+  });
+
+  const handleSendRequest = (userId) => {
+    sendRequestMutation(userId);
+  };
 
 
   const clearFilters = () => {
