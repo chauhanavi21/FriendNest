@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptFriendRequest, getFriendRequests } from "../lib/api";
-import { BellIcon, ClockIcon, MessageSquareIcon, UserCheckIcon } from "lucide-react";
+import { BellIcon, ClockIcon, MessageSquareIcon, UserCheckIcon, UserMinusIcon } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 import Avatar from "../components/Avatar";
 import useAuthUser from "../hooks/useAuthUser";
@@ -24,6 +24,7 @@ const NotificationsPage = () => {
 
   const incomingRequests = friendRequests?.incomingReqs || [];
   const acceptedRequests = friendRequests?.acceptedReqs || [];
+  const removedRequests = friendRequests?.removedReqs || [];
 
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
@@ -125,7 +126,48 @@ const NotificationsPage = () => {
               </section>
             )}
 
-            {incomingRequests.length === 0 && acceptedRequests.length === 0 && (
+            {removedRequests.length > 0 && (
+              <section className="space-y-3 sm:space-y-4">
+                <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2 flex-wrap">
+                  <UserMinusIcon className="h-5 w-5 text-error" />
+                  <span>Removed Friends</span>
+                  <span className="badge badge-error">{removedRequests.length}</span>
+                </h2>
+
+                <div className="space-y-3">
+                  {removedRequests.map((notification) => {
+                    const otherUser = notification.sender;
+
+                    return (
+                      <div key={notification._id} className="card bg-base-200 shadow-sm border border-error/20">
+                        <div className="card-body p-3 sm:p-4">
+                          <div className="flex items-start gap-3">
+                            <Avatar src={otherUser.profilePic} alt={otherUser.fullName} size="md" className="mt-1 sm:!w-12 sm:!h-12" />
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-sm sm:text-base truncate">{otherUser.fullName}</h3>
+                              <p className="text-xs sm:text-sm my-1 text-error">
+                                {otherUser.fullName} removed you as a friend
+                              </p>
+                              <p className="text-xs flex items-center opacity-70">
+                                <ClockIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+                                {new Date(notification.updatedAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="badge badge-error flex-shrink-0">
+                              <UserMinusIcon className="h-3 w-3 mr-1" />
+                              <span className="hidden sm:inline">Removed</span>
+                              <span className="sm:hidden">Rem</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {incomingRequests.length === 0 && acceptedRequests.length === 0 && removedRequests.length === 0 && (
               <NoNotificationsFound />
             )}
           </>

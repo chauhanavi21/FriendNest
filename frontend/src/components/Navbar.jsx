@@ -16,7 +16,6 @@ const Navbar = ({ onMenuClick }) => {
     <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-30 h-14 sm:h-16 flex items-center">
       <div className="container mx-auto px-3 sm:px-4 lg:px-8 w-full">
         <div className="flex items-center justify-between w-full gap-2">
-          {/* Left side - Logo (chat pages) or Menu button */}
           <div className="flex items-center gap-2">
             {onMenuClick && (
               <button
@@ -37,7 +36,6 @@ const Navbar = ({ onMenuClick }) => {
             )}
           </div>
 
-          {/* Right side - Actions */}
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
             <Link to={"/notifications"} className="btn btn-ghost btn-circle h-10 w-10 min-h-10 sm:h-12 sm:w-12 sm:min-h-12">
               <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 text-base-content opacity-70" />

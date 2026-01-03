@@ -142,6 +142,15 @@ export async function getFriendRequests(req, res) {
       .sort({ updatedAt: -1 })
       .limit(10);
 
+    // Get removed notifications where current user was removed (they are the recipient)
+    const removedReqs = await FriendRequest.find({
+      recipient: currentUserId,
+      status: "removed",
+    })
+      .populate("sender", "fullName profilePic")
+      .sort({ updatedAt: -1 })
+      .limit(10);
+
     // Combine and format accepted requests with role information
     const acceptedReqs = [
       ...acceptedReqsAsSender.map((req) => ({
@@ -156,7 +165,7 @@ export async function getFriendRequests(req, res) {
       })),
     ].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
-    res.status(200).json({ incomingReqs, acceptedReqs });
+    res.status(200).json({ incomingReqs, acceptedReqs, removedReqs });
   } catch (error) {
     console.log("Error in getPendingFriendRequests controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -255,17 +264,108 @@ export async function removeFriend(req, res) {
       $pull: { friends: myId },
     });
 
-    // Delete any friend requests between them
+    // Delete any pending friend requests between them
     await FriendRequest.deleteMany({
       $or: [
-        { sender: myId, recipient: friendId },
-        { sender: friendId, recipient: myId },
+        { sender: myId, recipient: friendId, status: "pending" },
+        { sender: friendId, recipient: myId, status: "pending" },
       ],
+    });
+
+    // Create a notification for the removed friend
+    // This creates a FriendRequest entry with status "removed" to notify the friend
+    await FriendRequest.create({
+      sender: myId,
+      recipient: friendId,
+      status: "removed",
     });
 
     res.status(200).json({ message: "Friend removed successfully" });
   } catch (error) {
     console.error("Error in removeFriend controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function searchUsers(req, res) {
+  try {
+    const currentUserId = req.user.id;
+    const currentUser = req.user;
+    const {
+      query: searchQuery = "",
+      nativeLanguage = "",
+      learningLanguage = "",
+      location = "",
+      sortBy = "recentlyActive",
+    } = req.query;
+
+    // Build the search filter
+    const filter = {
+      $and: [
+        { _id: { $ne: currentUserId } },
+        { _id: { $nin: currentUser.friends } },
+        { isOnboarded: true },
+      ],
+    };
+
+    // Add search query filter (name, location)
+    if (searchQuery) {
+      filter.$and.push({
+        $or: [
+          { fullName: { $regex: searchQuery, $options: "i" } },
+          { location: { $regex: searchQuery, $options: "i" } },
+          { bio: { $regex: searchQuery, $options: "i" } },
+        ],
+      });
+    }
+
+    // Add language filters
+    if (nativeLanguage) {
+      filter.$and.push({
+        nativeLanguage: { $regex: nativeLanguage, $options: "i" },
+      });
+    }
+
+    if (learningLanguage) {
+      filter.$and.push({
+        learningLanguage: { $regex: learningLanguage, $options: "i" },
+      });
+    }
+
+    // Add location filter
+    if (location) {
+      filter.$and.push({
+        location: { $regex: location, $options: "i" },
+      });
+    }
+
+    // Build sort options
+    let sortOptions = {};
+    switch (sortBy) {
+      case "recentlyActive":
+        sortOptions = { updatedAt: -1 };
+        break;
+      case "newUsers":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "location":
+        sortOptions = { location: 1 };
+        break;
+      case "name":
+        sortOptions = { fullName: 1 };
+        break;
+      default:
+        sortOptions = { updatedAt: -1 };
+    }
+
+    const users = await User.find(filter)
+      .select("-password")
+      .sort(sortOptions)
+      .limit(50);
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error in searchUsers controller:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

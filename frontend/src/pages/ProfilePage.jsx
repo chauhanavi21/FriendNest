@@ -71,7 +71,6 @@ const ProfilePage = () => {
       <div className="container mx-auto max-w-4xl">
         <div className="card bg-base-200 shadow-xl border border-base-300">
           <div className="card-body p-4 sm:p-6 md:p-8">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <h1 className="text-2xl sm:text-3xl font-bold">My Profile</h1>
               {!isEditing && (
@@ -86,9 +85,7 @@ const ProfilePage = () => {
             </div>
 
             {isEditing ? (
-              /* Edit Form */
               <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-                {/* Profile Picture */}
                 <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4">
                   <div className="size-24 sm:size-28 md:size-32 rounded-full bg-base-300 overflow-hidden flex-shrink-0 border-4 border-base-300">
                     {formState.profilePic ? (
@@ -116,7 +113,6 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                {/* Full Name */}
                 <div className="form-control">
                   <label className="label py-1 sm:py-2">
                     <span className="label-text text-sm sm:text-base font-semibold">Full Name</span>
@@ -131,7 +127,6 @@ const ProfilePage = () => {
                   />
                 </div>
 
-                {/* Bio */}
                 <div className="form-control">
                   <label className="label py-1 sm:py-2">
                     <span className="label-text text-sm sm:text-base font-semibold">Bio</span>
@@ -150,7 +145,6 @@ const ProfilePage = () => {
                   </label>
                 </div>
 
-                {/* Languages */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="form-control">
                     <label className="label py-1 sm:py-2">
@@ -189,7 +183,6 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                {/* Location */}
                 <div className="form-control">
                   <label className="label py-1 sm:py-2">
                     <span className="label-text text-sm sm:text-base font-semibold">Location</span>
@@ -206,7 +199,6 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <button
                     type="button"
@@ -236,9 +228,7 @@ const ProfilePage = () => {
                 </div>
               </form>
             ) : (
-              /* View Mode */
               <div className="space-y-6">
-                {/* Profile Picture and Name */}
                 <div className="flex flex-col items-center text-center space-y-4">
                   <Avatar src={authUser.profilePic} alt={authUser.fullName} size="xl" className="!w-32 !h-32 sm:!w-40 sm:!h-40" />
                   <div>
@@ -252,7 +242,6 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                {/* Bio */}
                 {authUser.bio && (
                   <div className="card bg-base-100 p-4 sm:p-6">
                     <h3 className="font-semibold text-base sm:text-lg mb-2">About</h3>
@@ -260,7 +249,6 @@ const ProfilePage = () => {
                   </div>
                 )}
 
-                {/* Languages */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {authUser.nativeLanguage && (
                     <div className="card bg-base-100 p-4 sm:p-5">
@@ -276,7 +264,6 @@ const ProfilePage = () => {
                   )}
                 </div>
 
-                {/* Account Info */}
                 <div className="card bg-base-100 p-4 sm:p-5">
                   <h3 className="font-semibold text-sm sm:text-base mb-3 opacity-70">Account Information</h3>
                   <div className="space-y-2">

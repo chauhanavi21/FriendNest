@@ -13,9 +13,7 @@ const Layout = ({ children, showSidebar = false }) => {
         <div className="flex">
           {showSidebar && (
             <>
-              {/* Desktop Sidebar */}
               <Sidebar />
-              {/* Mobile Sidebar */}
               <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
             </>
           )}

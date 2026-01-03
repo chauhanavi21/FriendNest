@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, XIcon } from "lucide-react";
+import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, XIcon, SearchIcon } from "lucide-react";
 import Avatar from "./Avatar";
 
 const Sidebar = () => {
@@ -38,6 +38,16 @@ const Sidebar = () => {
         >
           <UsersIcon className="size-5 text-base-content opacity-70" />
           <span>Friends</span>
+        </Link>
+
+        <Link
+          to="/search"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+            currentPath === "/search" ? "btn-active" : ""
+          }`}
+        >
+          <SearchIcon className="size-5 text-base-content opacity-70" />
+          <span>Search</span>
         </Link>
 
         <Link
@@ -111,6 +121,17 @@ export const MobileSidebar = ({ isOpen, onClose }) => {
           >
             <UsersIcon className="size-5 text-base-content opacity-70" />
             <span>Friends</span>
+          </Link>
+
+          <Link
+            to="/search"
+            className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+              currentPath === "/search" ? "btn-active" : ""
+            }`}
+            onClick={onClose}
+          >
+            <SearchIcon className="size-5 text-base-content opacity-70" />
+            <span>Search</span>
           </Link>
 
           <Link

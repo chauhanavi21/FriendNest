@@ -29,7 +29,6 @@ const FriendCard = ({ friend }) => {
   return (
     <div className="card bg-base-200 hover:shadow-md transition-shadow border border-base-300">
       <div className="card-body p-5 sm:p-6">
-        {/* USER INFO with Remove Button */}
         <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Avatar src={friend.profilePic} alt={friend.fullName} size="lg" className="sm:!w-16 sm:!h-16 flex-shrink-0" />
@@ -45,7 +44,6 @@ const FriendCard = ({ friend }) => {
           </button>
         </div>
 
-        {/* Language Badges */}
         <div className="flex flex-wrap gap-2 mb-5">
           <span className="badge badge-secondary text-sm py-2">
             {getLanguageFlag(friend.nativeLanguage)}
@@ -57,7 +55,6 @@ const FriendCard = ({ friend }) => {
           </span>
         </div>
 
-        {/* Message Button */}
         <Link 
           to={`/chat/${friend._id}`} 
           className="btn btn-outline w-full h-11 min-h-11 sm:h-12 sm:min-h-12 text-sm sm:text-base"

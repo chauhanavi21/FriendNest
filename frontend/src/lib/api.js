@@ -73,3 +73,15 @@ export async function removeFriend(friendId) {
   const response = await axiosInstance.delete(`/users/friends/${friendId}`);
   return response.data;
 }
+
+export async function searchUsers(params) {
+  const queryParams = new URLSearchParams();
+  if (params.query) queryParams.append("query", params.query);
+  if (params.nativeLanguage) queryParams.append("nativeLanguage", params.nativeLanguage);
+  if (params.learningLanguage) queryParams.append("learningLanguage", params.learningLanguage);
+  if (params.location) queryParams.append("location", params.location);
+  if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+
+  const response = await axiosInstance.get(`/users/search?${queryParams.toString()}`);
+  return response.data;
+}
