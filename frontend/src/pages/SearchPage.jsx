@@ -18,6 +18,8 @@ const SearchPage = () => {
   const [sortBy, setSortBy] = useState("recentlyActive");
   const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
 
+  const hasActiveSearch = searchQuery.trim() || nativeLanguage || learningLanguage || location;
+
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["searchUsers", searchQuery, nativeLanguage, learningLanguage, location, sortBy],
     queryFn: () =>
@@ -28,6 +30,7 @@ const SearchPage = () => {
         location,
         sortBy,
       }),
+    enabled: hasActiveSearch,
   });
 
   const { data: outgoingFriendReqs } = useQuery({
@@ -191,7 +194,14 @@ const SearchPage = () => {
           </div>
         </div>
 
-        {isLoading ? (
+        {!hasActiveSearch ? (
+          <div className="card bg-base-200 p-8 text-center border border-base-300 shadow-sm">
+            <h3 className="font-semibold text-lg mb-2">Start your search</h3>
+            <p className="text-sm text-base-content opacity-70">
+              Enter a name, location, or use filters to find language exchange partners
+            </p>
+          </div>
+        ) : isLoading ? (
           <div className="flex justify-center py-12">
             <span className="loading loading-spinner loading-lg" />
           </div>
