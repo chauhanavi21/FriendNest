@@ -131,9 +131,7 @@ const App = () => {
           path="/chatroom"
           element={
             isAuthenticated && isOnboarded ? (
-              <Layout showSidebar={true}>
-                <ChatRoomPage />
-              </Layout>
+              <ChatRoomPage />
             ) : (
               <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
             )

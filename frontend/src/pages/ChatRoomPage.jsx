@@ -16,7 +16,9 @@ import toast from "react-hot-toast";
 import ChatLoader from "../components/ChatLoader";
 import CallButton from "../components/CallButton";
 import Avatar from "../components/Avatar";
-import { MessageSquareIcon, ArrowLeftIcon } from "lucide-react";
+import { MessageSquareIcon, ArrowLeftIcon, MenuIcon, XIcon } from "lucide-react";
+import Sidebar, { MobileSidebar } from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
@@ -26,6 +28,8 @@ const ChatRoomPage = () => {
   const [channel, setChannel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { authUser } = useAuthUser();
 
@@ -122,18 +126,42 @@ const ChatRoomPage = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col lg:flex-row bg-base-100">
-      <div
-        className={`${
-          showChatOnMobile ? "hidden" : "flex"
-        } lg:flex flex-col w-full lg:w-[30%] border-r border-base-300 bg-base-200`}
-      >
-        <div className="p-4 border-b border-base-300">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <MessageSquareIcon className="size-5" />
-            Messages
-          </h2>
-        </div>
+    <div className="min-h-screen relative bg-base-100">
+      <input id="mobile-drawer" type="checkbox" className="drawer-toggle hidden" checked={isMobileMenuOpen} readOnly />
+      
+      <div className="min-h-screen">
+        <div className="flex">
+          {isSidebarOpen && (
+            <>
+              <Sidebar />
+              <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+            </>
+          )}
+
+          <div className="flex-1 flex flex-col bg-base-100">
+            <Navbar onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+            
+            <div className="h-[calc(100vh-4rem)] flex flex-col lg:flex-row bg-base-100">
+              <div
+                className={`${
+                  showChatOnMobile ? "hidden" : "flex"
+                } lg:flex flex-col w-full lg:w-[22%] border-r border-base-300 bg-base-200`}
+              >
+                <div className="p-4 border-b border-base-300 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1">
+                    <button
+                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                      className="btn btn-ghost btn-sm btn-circle lg:flex hidden"
+                      aria-label="Toggle sidebar"
+                    >
+                      <MenuIcon className="size-5" />
+                    </button>
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                      <MessageSquareIcon className="size-5" />
+                      Messages
+                    </h2>
+                  </div>
+                </div>
         <div className="flex-1 overflow-y-auto">
           {loadingFriends ? (
             <div className="flex justify-center items-center h-full">
@@ -172,7 +200,7 @@ const ChatRoomPage = () => {
       <div
         className={`${
           showChatOnMobile ? "flex" : "hidden"
-        } lg:flex flex-col flex-1 w-full lg:w-[70%] bg-base-100`}
+        } lg:flex flex-col flex-1 w-full lg:w-[78%] bg-base-100`}
       >
         {selectedFriendId && channel ? (
           <>
@@ -216,6 +244,9 @@ const ChatRoomPage = () => {
             </div>
           </div>
         )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
