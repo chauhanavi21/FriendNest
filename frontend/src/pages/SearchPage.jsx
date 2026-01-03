@@ -18,7 +18,7 @@ const SearchPage = () => {
   const [sortBy, setSortBy] = useState("recentlyActive");
   const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
 
-  const hasActiveSearch = searchQuery.trim() || nativeLanguage || learningLanguage || location;
+  const hasActiveSearch = Boolean(searchQuery.trim() || nativeLanguage || learningLanguage || location);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["searchUsers", searchQuery, nativeLanguage, learningLanguage, location, sortBy],
