@@ -76,6 +76,15 @@ export async function sendFriendRequest(req, res) {
       }
     }
 
+    // Clean up any old "removed" status requests before creating a new one
+    // This prevents database clutter when users re-request after removal
+    await FriendRequest.deleteMany({
+      $or: [
+        { sender: myId, recipient: recipientId, status: "removed" },
+        { sender: recipientId, recipient: myId, status: "removed" },
+      ],
+    });
+
     const friendRequest = await FriendRequest.create({
       sender: myId,
       recipient: recipientId,
@@ -273,11 +282,12 @@ export async function removeFriend(req, res) {
       $pull: { friends: myId },
     });
 
-    // Delete any pending friend requests between them
+    // Delete ALL existing friend requests between them (pending, accepted, removed)
+    // This ensures a clean slate when removing a friend
     await FriendRequest.deleteMany({
       $or: [
-        { sender: myId, recipient: friendId, status: "pending" },
-        { sender: friendId, recipient: myId, status: "pending" },
+        { sender: myId, recipient: friendId },
+        { sender: friendId, recipient: myId },
       ],
     });
 
