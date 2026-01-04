@@ -260,18 +260,26 @@ const ChatRoomPage = () => {
               <Chat client={chatClient}>
                 <Channel channel={channel}>
                   <div className="w-full h-full relative flex-1 flex flex-col">
-                    <div className="flex items-center justify-between p-2 border-b border-base-300 bg-base-200 sticky top-0 z-10">
-                      <CallButton handleVideoCall={handleVideoCall} />
+                    <div className="flex items-center justify-between p-3 border-b border-base-300 bg-base-200 sticky top-0 z-10">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <CallButton handleVideoCall={handleVideoCall} />
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <Avatar src={selectedFriend?.profilePic} alt={selectedFriend?.fullName} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold truncate">{selectedFriend?.fullName}</p>
+                            <p className="text-xs opacity-70">2 members, 1 online</p>
+                          </div>
+                        </div>
+                      </div>
                       <button
                         onClick={() => setShowMessageSearch(!showMessageSearch)}
-                        className="btn btn-ghost btn-sm btn-circle"
+                        className="btn btn-ghost btn-sm btn-circle flex-shrink-0"
                         aria-label="Search messages"
                       >
                         <SearchIcon className="size-4" />
                       </button>
                     </div>
                     <Window>
-                      <ChannelHeader />
                       <MessageList />
                       <TypingIndicator />
                       <MessageInput focus />
