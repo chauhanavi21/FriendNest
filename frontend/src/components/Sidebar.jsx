@@ -10,7 +10,7 @@ const Sidebar = () => {
 
   return (
     <aside className="w-64 bg-base-200 border-r border-base-300 hidden lg:flex flex-col h-full">
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         <Link
           to="/"
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
@@ -72,7 +72,7 @@ const Sidebar = () => {
         </Link>
       </nav>
 
-      <div className="p-4 border-t border-base-300 mt-auto">
+      <div className="p-3 border-t border-base-300 mt-auto">
         <Link to="/profile" className="flex items-center gap-3 hover:bg-base-300 rounded-lg p-2 -m-2 transition-colors">
           <Avatar src={authUser?.profilePic} alt="User Avatar" size="md" />
           <div className="flex-1 min-w-0">
@@ -105,7 +105,7 @@ export const MobileSidebar = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           <Link
             to="/"
             className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
@@ -173,7 +173,7 @@ export const MobileSidebar = ({ isOpen, onClose }) => {
           </Link>
         </nav>
 
-        <div className="p-4 border-t border-base-300 mt-auto">
+        <div className="p-3 border-t border-base-300 mt-auto">
           <Link to="/profile" className="flex items-center gap-3 hover:bg-base-300 rounded-lg p-2 -m-2 transition-colors" onClick={onClose}>
             <Avatar src={authUser?.profilePic} alt="User Avatar" size="md" />
             <div className="flex-1 min-w-0">
