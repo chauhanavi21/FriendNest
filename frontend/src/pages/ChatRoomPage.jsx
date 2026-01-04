@@ -244,6 +244,7 @@ const ChatRoomPage = () => {
             </div>
           </div>
         )}
+      </div>
             </div>
           </div>
         </div>
