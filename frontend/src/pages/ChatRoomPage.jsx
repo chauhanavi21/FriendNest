@@ -151,7 +151,7 @@ const ChatRoomPage = () => {
                   <div className="flex items-center gap-2 flex-1">
                     <button
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                      className="btn btn-ghost btn-sm btn-circle lg:flex hidden"
+                      className="btn btn-ghost btn-sm btn-circle"
                       aria-label="Toggle sidebar"
                     >
                       <MenuIcon className="size-5" />
