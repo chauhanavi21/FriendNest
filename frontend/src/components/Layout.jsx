@@ -11,7 +11,7 @@ const Layout = ({ children, showSidebar = false }) => {
       
       <Navbar onMenuClick={showSidebar ? () => setIsMobileMenuOpen(!isMobileMenuOpen) : undefined} />
 
-      <div className="flex min-h-[calc(100vh-4rem)]">
+      <div className="flex h-[calc(100vh-4rem)]">
         {showSidebar && (
           <>
             <Sidebar />
