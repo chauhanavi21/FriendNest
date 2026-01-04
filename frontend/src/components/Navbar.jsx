@@ -9,9 +9,6 @@ import { getFriendRequests } from "../lib/api";
 
 const Navbar = ({ onMenuClick }) => {
   const { authUser } = useAuthUser();
-  const location = useLocation();
-  const isChatPage = location.pathname?.startsWith("/chat");
-
   const { logoutMutation } = useLogout();
 
   const { data: friendRequests } = useQuery({
@@ -38,14 +35,12 @@ const Navbar = ({ onMenuClick }) => {
                 <MenuIcon className="h-5 w-5 sm:h-6 sm:w-6 text-base-content opacity-70" />
               </button>
             )}
-            {isChatPage && (
-              <Link to="/" className="flex items-center gap-1.5 sm:gap-2.5">
-                <ShipWheelIcon className="size-6 sm:size-7 lg:size-9 text-primary" />
-                <span className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-                  FriendNest
-                </span>
-              </Link>
-            )}
+            <Link to="/" className="flex items-center gap-1.5 sm:gap-2.5">
+              <ShipWheelIcon className="size-6 sm:size-7 lg:size-9 text-primary" />
+              <span className="text-xl sm:text-2xl lg:text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+                FriendNest
+              </span>
+            </Link>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
