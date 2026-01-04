@@ -188,8 +188,8 @@ const SettingsPage = () => {
   }
 
   return (
-    <div className="p-4 sm:p-5 md:p-6 lg:p-8 bg-base-100 min-h-full">
-      <div className="container mx-auto max-w-5xl">
+    <div className="p-4 md:p-6 bg-base-100 min-h-full">
+      <div className="container mx-auto max-w-7xl">
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">Settings</h1>
           <p className="text-sm sm:text-base opacity-70">Manage your account settings and preferences</p>
