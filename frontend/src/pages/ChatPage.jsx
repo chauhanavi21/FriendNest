@@ -104,7 +104,7 @@ const ChatPage = () => {
         <Channel channel={channel}>
           <div className="w-full relative flex-1 flex flex-col">
             <div className="flex items-center justify-between p-2 border-b border-base-300 bg-base-200">
-              <div className="flex-1" />
+              <CallButton handleVideoCall={handleVideoCall} />
               <button
                 onClick={() => setShowMessageSearch(!showMessageSearch)}
                 className="btn btn-ghost btn-sm btn-circle"
@@ -113,7 +113,6 @@ const ChatPage = () => {
                 <SearchIcon className="size-4" />
               </button>
             </div>
-            <CallButton handleVideoCall={handleVideoCall} />
             <Window>
               <ChannelHeader />
               <MessageList />
