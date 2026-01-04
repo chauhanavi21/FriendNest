@@ -1,8 +1,8 @@
-# FriendNest
+
 
 <div align="center">
   
-![FriendNest Logo](https://via.placeholder.com/200x60/4A5568/FFFFFF?text=FriendNest)
+# FriendNest
 
 **A modern social platform for connecting with language exchange partners through real-time chat and video calling**
 
