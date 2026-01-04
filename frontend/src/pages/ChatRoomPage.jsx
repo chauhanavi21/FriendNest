@@ -9,14 +9,16 @@ import {
   MessageInput,
   MessageList,
   Thread,
+  TypingIndicator,
   Window,
 } from "stream-chat-react";
 import { StreamChat } from "stream-chat";
 import toast from "react-hot-toast";
 import ChatLoader from "../components/ChatLoader";
 import CallButton from "../components/CallButton";
+import MessageSearch from "../components/MessageSearch";
 import Avatar from "../components/Avatar";
-import { MessageSquareIcon, ArrowLeftIcon, MenuIcon, XIcon } from "lucide-react";
+import { MessageSquareIcon, ArrowLeftIcon, MenuIcon, XIcon, SearchIcon } from "lucide-react";
 import Sidebar, { MobileSidebar } from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
@@ -30,6 +32,8 @@ const ChatRoomPage = () => {
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showMessageSearch, setShowMessageSearch] = useState(false);
+  const [unreadCounts, setUnreadCounts] = useState({});
 
   const { authUser } = useAuthUser();
 
@@ -97,6 +101,32 @@ const ChatRoomPage = () => {
 
     initChannel();
   }, [selectedFriendId, chatClient, authUser]);
+
+  useEffect(() => {
+    if (!chatClient || !authUser || friends.length === 0) return;
+
+    const updateUnreadCounts = async () => {
+      const counts = {};
+      for (const friend of friends) {
+        try {
+          const channelId = [authUser._id, friend._id].sort().join("-");
+          const friendChannel = chatClient.channel("messaging", channelId);
+          await friendChannel.watch();
+          const unread = friendChannel.countUnread();
+          counts[friend._id] = unread;
+        } catch (error) {
+          console.error(`Error getting unread count for ${friend._id}:`, error);
+        }
+      }
+      setUnreadCounts(counts);
+    };
+
+    updateUnreadCounts();
+
+    const interval = setInterval(updateUnreadCounts, 5000);
+
+    return () => clearInterval(interval);
+  }, [chatClient, authUser, friends]);
 
   const handleFriendClick = (friendId) => {
     setSelectedFriendId(friendId);
@@ -183,7 +213,14 @@ const ChatRoomPage = () => {
                   <div className="flex items-center gap-3">
                     <Avatar src={friend.profilePic} alt={friend.fullName} size="md" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate">{friend.fullName}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold truncate">{friend.fullName}</p>
+                        {unreadCounts[friend._id] > 0 && (
+                          <span className="badge badge-primary badge-sm min-w-[1.25rem] h-5 text-xs font-bold flex items-center justify-center px-1">
+                            {unreadCounts[friend._id] > 99 ? "99+" : unreadCounts[friend._id]}
+                          </span>
+                        )}
+                      </div>
                       {friend.location && (
                         <p className="text-xs opacity-70 truncate">{friend.location}</p>
                       )}
@@ -216,14 +253,28 @@ const ChatRoomPage = () => {
                 <p className="font-semibold truncate">{selectedFriend?.fullName}</p>
               </div>
             </div>
-            <div className="flex-1 relative h-full">
+            <div className="flex-1 relative h-full flex flex-col">
+              {showMessageSearch && (
+                <MessageSearch channel={channel} onClose={() => setShowMessageSearch(false)} />
+              )}
               <Chat client={chatClient}>
                 <Channel channel={channel}>
-                  <div className="w-full h-full relative">
+                  <div className="w-full h-full relative flex-1 flex flex-col">
+                    <div className="flex items-center justify-between p-2 border-b border-base-300 bg-base-200">
+                      <div className="flex-1" />
+                      <button
+                        onClick={() => setShowMessageSearch(!showMessageSearch)}
+                        className="btn btn-ghost btn-sm btn-circle"
+                        aria-label="Search messages"
+                      >
+                        <SearchIcon className="size-4" />
+                      </button>
+                    </div>
                     <CallButton handleVideoCall={handleVideoCall} />
                     <Window>
                       <ChannelHeader />
                       <MessageList />
+                      <TypingIndicator />
                       <MessageInput focus />
                     </Window>
                   </div>

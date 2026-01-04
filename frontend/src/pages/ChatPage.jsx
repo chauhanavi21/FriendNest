@@ -11,6 +11,7 @@ import {
   MessageInput,
   MessageList,
   Thread,
+  TypingIndicator,
   Window,
 } from "stream-chat-react";
 import { StreamChat } from "stream-chat";
@@ -18,6 +19,8 @@ import toast from "react-hot-toast";
 
 import ChatLoader from "../components/ChatLoader";
 import CallButton from "../components/CallButton";
+import MessageSearch from "../components/MessageSearch";
+import { SearchIcon } from "lucide-react";
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
@@ -27,6 +30,7 @@ const ChatPage = () => {
   const [chatClient, setChatClient] = useState(null);
   const [channel, setChannel] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showMessageSearch, setShowMessageSearch] = useState(false);
 
   const { authUser } = useAuthUser();
 
@@ -92,14 +96,28 @@ const ChatPage = () => {
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
   return (
-    <div className="h-[93vh]">
+    <div className="h-[93vh] flex flex-col">
+      {showMessageSearch && (
+        <MessageSearch channel={channel} onClose={() => setShowMessageSearch(false)} />
+      )}
       <Chat client={chatClient}>
         <Channel channel={channel}>
-          <div className="w-full relative">
+          <div className="w-full relative flex-1 flex flex-col">
+            <div className="flex items-center justify-between p-2 border-b border-base-300 bg-base-200">
+              <div className="flex-1" />
+              <button
+                onClick={() => setShowMessageSearch(!showMessageSearch)}
+                className="btn btn-ghost btn-sm btn-circle"
+                aria-label="Search messages"
+              >
+                <SearchIcon className="size-4" />
+              </button>
+            </div>
             <CallButton handleVideoCall={handleVideoCall} />
             <Window>
               <ChannelHeader />
               <MessageList />
+              <TypingIndicator />
               <MessageInput focus />
             </Window>
           </div>
