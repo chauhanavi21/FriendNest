@@ -129,19 +129,18 @@ const ChatRoomPage = () => {
     <div className="min-h-screen relative bg-base-100">
       <input id="mobile-drawer" type="checkbox" className="drawer-toggle hidden" checked={isMobileMenuOpen} readOnly />
       
-      <div className="min-h-screen">
-        <div className="flex">
-          {isSidebarOpen && (
-            <>
-              <Sidebar />
-              <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-            </>
-          )}
+      <Navbar onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
 
-          <div className="flex-1 flex flex-col bg-base-100">
-            <Navbar onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
-            
-            <div className="h-[calc(100vh-4rem)] flex flex-col lg:flex-row bg-base-100">
+      <div className="flex min-h-[calc(100vh-4rem)]">
+        {isSidebarOpen && (
+          <>
+            <Sidebar />
+            <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+          </>
+        )}
+
+        <div className="flex-1 flex flex-col bg-base-100">
+          <div className="h-full flex flex-col lg:flex-row bg-base-100">
               <div
                 className={`${
                   showChatOnMobile ? "hidden" : "flex"
@@ -245,7 +244,6 @@ const ChatRoomPage = () => {
           </div>
         )}
       </div>
-            </div>
           </div>
         </div>
       </div>
