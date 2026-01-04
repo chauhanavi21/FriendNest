@@ -12,6 +12,9 @@ import ProfilePage from "./pages/ProfilePage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import ChatRoomPage from "./pages/ChatRoomPage.jsx";
+import GroupsPage from "./pages/GroupsPage.jsx";
+import GroupDetailPage from "./pages/GroupDetailPage.jsx";
+import GroupChatPage from "./pages/GroupChatPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -143,6 +146,42 @@ const App = () => {
             isAuthenticated && isOnboarded ? (
               <Layout showSidebar={false}>
                 <ChatPage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
+          path="/groups"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <GroupsPage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
+          path="/groups/:id"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <GroupDetailPage />
+              </Layout>
+            ) : (
+              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+            )
+          }
+        />
+        <Route
+          path="/groups/:id/chat"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={false}>
+                <GroupChatPage />
               </Layout>
             ) : (
               <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

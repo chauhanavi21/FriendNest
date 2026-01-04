@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, XIcon, SearchIcon, SettingsIcon, MessageSquareIcon } from "lucide-react";
+import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, XIcon, SearchIcon, SettingsIcon, MessageSquareIcon, UserCircleIcon } from "lucide-react";
 import Avatar from "./Avatar";
 
 const Sidebar = () => {
@@ -148,6 +148,17 @@ export const MobileSidebar = ({ isOpen, onClose }) => {
           >
             <MessageSquareIcon className="size-5 text-base-content opacity-70" />
             <span>Chatroom</span>
+          </Link>
+
+          <Link
+            to="/groups"
+            className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+              currentPath.startsWith("/groups") ? "btn-active" : ""
+            }`}
+            onClick={onClose}
+          >
+            <UserCircleIcon className="size-5 text-base-content opacity-70" />
+            <span>Groups</span>
           </Link>
 
           <Link

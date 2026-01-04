@@ -105,3 +105,69 @@ export async function deleteAccount(password) {
   const response = await axiosInstance.delete("/users/account", { data: { password } });
   return response.data;
 }
+
+// Group API functions
+export async function getGroups(params = {}) {
+  const queryParams = new URLSearchParams();
+  if (params.language) queryParams.append("language", params.language);
+  if (params.search) queryParams.append("search", params.search);
+
+  const response = await axiosInstance.get(`/groups?${queryParams.toString()}`);
+  return response.data;
+}
+
+export async function getMyGroups() {
+  const response = await axiosInstance.get("/groups/my-groups");
+  return response.data;
+}
+
+export async function getGroupById(groupId) {
+  const response = await axiosInstance.get(`/groups/${groupId}`);
+  return response.data;
+}
+
+export async function createGroup(groupData) {
+  const response = await axiosInstance.post("/groups", groupData);
+  return response.data;
+}
+
+export async function updateGroup(groupId, groupData) {
+  const response = await axiosInstance.put(`/groups/${groupId}`, groupData);
+  return response.data;
+}
+
+export async function deleteGroup(groupId) {
+  const response = await axiosInstance.delete(`/groups/${groupId}`);
+  return response.data;
+}
+
+export async function joinGroup(groupId) {
+  const response = await axiosInstance.post(`/groups/${groupId}/join`);
+  return response.data;
+}
+
+export async function leaveGroup(groupId) {
+  const response = await axiosInstance.post(`/groups/${groupId}/leave`);
+  return response.data;
+}
+
+// Event API functions
+export async function createEvent(groupId, eventData) {
+  const response = await axiosInstance.post(`/groups/${groupId}/events`, eventData);
+  return response.data;
+}
+
+export async function joinEvent(groupId, eventId) {
+  const response = await axiosInstance.post(`/groups/${groupId}/events/${eventId}/join`);
+  return response.data;
+}
+
+export async function leaveEvent(groupId, eventId) {
+  const response = await axiosInstance.post(`/groups/${groupId}/events/${eventId}/leave`);
+  return response.data;
+}
+
+export async function deleteEvent(groupId, eventId) {
+  const response = await axiosInstance.delete(`/groups/${groupId}/events/${eventId}`);
+  return response.data;
+}
