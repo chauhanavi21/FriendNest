@@ -52,6 +52,16 @@ const Sidebar = () => {
         </Link>
 
         <Link
+          to="/groups"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+            currentPath.startsWith("/groups") ? "btn-active" : ""
+          }`}
+        >
+          <UserCircleIcon className="size-5 text-base-content opacity-70" />
+          <span>Groups</span>
+        </Link>
+
+        <Link
           to="/notifications"
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
             currentPath === "/notifications" ? "btn-active" : ""

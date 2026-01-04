@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Sidebar, { MobileSidebar } from "./Sidebar";
 import Navbar from "./Navbar";
-import Footer from "./Footer";
 
 const Layout = ({ children, showSidebar = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -23,7 +22,6 @@ const Layout = ({ children, showSidebar = false }) => {
 
           <main className="flex-1 overflow-y-auto bg-base-100 min-h-0">{children}</main>
         </div>
-        <Footer />
       </div>
     </div>
   );
