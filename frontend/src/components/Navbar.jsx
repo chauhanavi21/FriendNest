@@ -5,7 +5,7 @@ import ThemeSelector from "./ThemeSelector";
 import useLogout from "../hooks/useLogout";
 import Avatar from "./Avatar";
 import { useQuery } from "@tanstack/react-query";
-import { getFriendRequests } from "../lib/api";
+import { getFriendRequests, getNotifications } from "../lib/api";
 
 const Navbar = ({ onMenuClick }) => {
   const { authUser } = useAuthUser();
@@ -17,9 +17,17 @@ const Navbar = ({ onMenuClick }) => {
     enabled: !!authUser,
   });
 
+  const { data: notificationsData } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: getNotifications,
+    enabled: !!authUser,
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
   const incomingRequests = friendRequests?.incomingReqs || [];
   const removedRequests = friendRequests?.removedReqs || [];
-  const unseenCount = incomingRequests.length + removedRequests.length;
+  const unreadMessageNotifications = notificationsData?.notifications?.filter(n => n.type === "message" && !n.isRead) || [];
+  const unseenCount = incomingRequests.length + removedRequests.length + unreadMessageNotifications.length;
 
   return (
     <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-30 h-14 sm:h-16 flex items-center">

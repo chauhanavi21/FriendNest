@@ -1,18 +1,35 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { acceptFriendRequest, getFriendRequests } from "../lib/api";
+import { useEffect, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { acceptFriendRequest, getFriendRequests, getNotifications, markNotificationAsRead } from "../lib/api";
 import { BellIcon, ClockIcon, MessageSquareIcon, UserCheckIcon, UserMinusIcon } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 import Avatar from "../components/Avatar";
 import useAuthUser from "../hooks/useAuthUser";
+import { useNavigate } from "react-router";
 
 const NotificationsPage = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { authUser } = useAuthUser();
 
-  const { data: friendRequests, isLoading } = useQuery({
+  const { data: friendRequests, isLoading: loadingFriendRequests } = useQuery({
     queryKey: ["friendRequests"],
     queryFn: getFriendRequests,
   });
+
+  const { data: notificationsData, isLoading: loadingNotifications } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: getNotifications,
+    refetchInterval: 10000, // Refetch every 10 seconds
+  });
+
+  // Listen for notification creation events
+  useEffect(() => {
+    const handleNotificationCreated = () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    };
+    window.addEventListener("notificationCreated", handleNotificationCreated);
+    return () => window.removeEventListener("notificationCreated", handleNotificationCreated);
+  }, [queryClient]);
 
   const { mutate: acceptRequestMutation, isPending } = useMutation({
     mutationFn: acceptFriendRequest,
@@ -22,9 +39,35 @@ const NotificationsPage = () => {
     },
   });
 
+  const { mutate: markAsReadMutation } = useMutation({
+    mutationFn: markNotificationAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
   const incomingRequests = friendRequests?.incomingReqs || [];
   const acceptedRequests = friendRequests?.acceptedReqs || [];
   const removedRequests = friendRequests?.removedReqs || [];
+  const messageNotifications = notificationsData?.notifications?.filter(n => n.type === "message") || [];
+  
+  const isLoading = loadingFriendRequests || loadingNotifications;
+
+  const handleMessageNotificationClick = (notification) => {
+    // Mark as read
+    if (!notification.isRead) {
+      markAsReadMutation(notification._id);
+    }
+    
+    // Extract friend ID from channelId (format: "userId1-userId2")
+    if (notification.channelId && authUser) {
+      const channelParts = notification.channelId.split("-");
+      const friendId = channelParts.find(id => id !== authUser._id);
+      if (friendId) {
+        navigate(`/chat/${friendId}`);
+      }
+    }
+  };
 
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
@@ -167,7 +210,55 @@ const NotificationsPage = () => {
               </section>
             )}
 
-            {incomingRequests.length === 0 && acceptedRequests.length === 0 && removedRequests.length === 0 && (
+            {messageNotifications.length > 0 && (
+              <section className="space-y-3 sm:space-y-4">
+                <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2 flex-wrap">
+                  <MessageSquareIcon className="h-5 w-5 text-info" />
+                  <span>Messages</span>
+                  <span className="badge badge-info">{messageNotifications.length}</span>
+                </h2>
+
+                <div className="space-y-3">
+                  {messageNotifications.map((notification) => {
+                    const sender = notification.sender;
+                    if (!sender) return null;
+
+                    return (
+                      <div
+                        key={notification._id}
+                        className={`card bg-base-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${!notification.isRead ? "ring-2 ring-info/50" : ""}`}
+                        onClick={() => handleMessageNotificationClick(notification)}
+                      >
+                        <div className="card-body p-3 sm:p-4">
+                          <div className="flex items-start gap-3">
+                            <Avatar src={sender.profilePic} alt={sender.fullName} size="md" className="mt-1 sm:!w-12 sm:!h-12" />
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-sm sm:text-base truncate">{sender.fullName}</h3>
+                              <p className="text-xs sm:text-sm my-1">
+                                {notification.metadata?.messagePreview || notification.message}
+                              </p>
+                              <p className="text-xs flex items-center opacity-70">
+                                <ClockIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+                                {new Date(notification.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                            {!notification.isRead && (
+                              <div className="badge badge-info flex-shrink-0">
+                                <MessageSquareIcon className="h-3 w-3 mr-1" />
+                                <span className="hidden sm:inline">New</span>
+                                <span className="sm:hidden">N</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {incomingRequests.length === 0 && acceptedRequests.length === 0 && removedRequests.length === 0 && messageNotifications.length === 0 && (
               <NoNotificationsFound />
             )}
           </>

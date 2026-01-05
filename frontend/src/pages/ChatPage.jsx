@@ -71,6 +71,9 @@ const ChatPage = () => {
 
         setChatClient(client);
         setChannel(currChannel);
+        
+        // Notify the message notification hook about the current channel
+        window.dispatchEvent(new CustomEvent("currentChannelChanged", { detail: { channelId } }));
       } catch (error) {
         console.error("Error initializing chat:", error);
         toast.error("Could not connect to chat. Please try again.");
@@ -80,6 +83,11 @@ const ChatPage = () => {
     };
 
     initChat();
+    
+    // Cleanup: notify that channel is no longer active when component unmounts
+    return () => {
+      window.dispatchEvent(new CustomEvent("currentChannelChanged", { detail: { channelId: null } }));
+    };
   }, [tokenData, authUser, targetUserId]);
 
   const handleVideoCall = () => {
@@ -105,23 +113,23 @@ const ChatPage = () => {
         <Channel channel={channel}>
           <div className="w-full relative flex-1 flex flex-col">
             <div className="flex items-center justify-between p-3 border-b border-base-300 bg-base-200 sticky top-0 z-10">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <CallButton handleVideoCall={handleVideoCall} />
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <Avatar src={targetFriend?.profilePic} alt={targetFriend?.fullName} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{targetFriend?.fullName}</p>
-                    <p className="text-xs opacity-70">2 members, 1 online</p>
-                  </div>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Avatar src={targetFriend?.profilePic} alt={targetFriend?.fullName} size="sm" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate text-base-content">{targetFriend?.fullName}</p>
+                  <p className="text-xs opacity-70 text-base-content">2 members, 1 online</p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowMessageSearch(!showMessageSearch)}
-                className="btn btn-ghost btn-sm btn-circle flex-shrink-0"
-                aria-label="Search messages"
-              >
-                <SearchIcon className="size-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowMessageSearch(!showMessageSearch)}
+                  className="btn btn-ghost btn-sm btn-circle flex-shrink-0"
+                  aria-label="Search messages"
+                >
+                  <SearchIcon className="size-4" />
+                </button>
+                <CallButton handleVideoCall={handleVideoCall} />
+              </div>
             </div>
             <Window>
               <MessageList />

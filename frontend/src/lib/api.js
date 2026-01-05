@@ -171,3 +171,28 @@ export async function deleteEvent(groupId, eventId) {
   const response = await axiosInstance.delete(`/groups/${groupId}/events/${eventId}`);
   return response.data;
 }
+
+// Notification API functions
+export async function getNotifications() {
+  const response = await axiosInstance.get("/notifications");
+  return response.data;
+}
+
+export async function markNotificationAsRead(notificationId) {
+  const response = await axiosInstance.put(`/notifications/${notificationId}/read`);
+  return response.data;
+}
+
+export async function markAllNotificationsAsRead() {
+  const response = await axiosInstance.put("/notifications/read-all");
+  return response.data;
+}
+
+export async function createMessageNotification(senderId, channelId, messagePreview) {
+  const response = await axiosInstance.post("/notifications/message", {
+    senderId,
+    channelId,
+    messagePreview,
+  });
+  return response.data;
+}
