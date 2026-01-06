@@ -41,6 +41,14 @@ const ChatPage = () => {
     enabled: !!authUser,
   });
 
+  const { data: friends = [] } = useQuery({
+    queryKey: ["friends"],
+    queryFn: getUserFriends,
+    enabled: !!authUser,
+  });
+
+  const targetFriend = friends.find((friend) => friend._id === targetUserId);
+
   useEffect(() => {
     const initChat = async () => {
       if (!tokenData?.token || !authUser) return;
