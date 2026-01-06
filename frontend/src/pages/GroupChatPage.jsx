@@ -44,36 +44,67 @@ const GroupChatPage = () => {
 
   useEffect(() => {
     const initChat = async () => {
-      if (!tokenData?.token || !authUser || !group?.streamChannelId) return;
+      // Wait for group data to load
+      if (!group) {
+        setLoading(true);
+        return;
+      }
+
+      // Check if user is a member
+      if (!group.isMember) {
+        toast.error("You must be a member of this group to access the chat");
+        setLoading(false);
+        return;
+      }
+
+      // Check if stream channel exists
+      if (!group.streamChannelId) {
+        toast.error("Group chat is not available. Please contact the group creator.");
+        setLoading(false);
+        return;
+      }
+
+      if (!tokenData?.token || !authUser) {
+        setLoading(true);
+        return;
+      }
 
       try {
         const client = StreamChat.getInstance(STREAM_API_KEY);
 
-        await client.connectUser(
-          {
-            id: authUser._id,
-            name: authUser.fullName,
-            image: authUser.profilePic,
-          },
-          tokenData.token
-        );
+        // Connect if not already connected
+        if (!client.userID) {
+          await client.connectUser(
+            {
+              id: authUser._id,
+              name: authUser.fullName,
+              image: authUser.profilePic,
+            },
+            tokenData.token
+          );
+        }
 
         const currChannel = client.channel("messaging", group.streamChannelId);
 
+        // Try to watch the channel - this will fail if user is not a member
         await currChannel.watch();
 
         setChatClient(client);
         setChannel(currChannel);
+        setLoading(false);
       } catch (error) {
         console.error("Error initializing chat:", error);
-        toast.error("Could not connect to group chat. Please try again.");
-      } finally {
+        if (error.message?.includes("not a member") || error.message?.includes("permission")) {
+          toast.error("You don't have permission to access this group chat. Please join the group first.");
+        } else {
+          toast.error("Could not connect to group chat. Please try again.");
+        }
         setLoading(false);
       }
     };
 
     initChat();
-  }, [tokenData, authUser, group?.streamChannelId]);
+  }, [tokenData, authUser, group]);
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
