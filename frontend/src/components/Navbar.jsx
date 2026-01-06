@@ -1,15 +1,17 @@
+import { useEffect } from "react";
 import { Link, useLocation } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
 import { BellIcon, LogOutIcon, MenuIcon, ShipWheelIcon } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
 import useLogout from "../hooks/useLogout";
 import Avatar from "./Avatar";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFriendRequests, getNotifications } from "../lib/api";
 
 const Navbar = ({ onMenuClick }) => {
   const { authUser } = useAuthUser();
   const { logoutMutation } = useLogout();
+  const queryClient = useQueryClient();
 
   const { data: friendRequests } = useQuery({
     queryKey: ["friendRequests"],
@@ -21,8 +23,18 @@ const Navbar = ({ onMenuClick }) => {
     queryKey: ["notifications"],
     queryFn: getNotifications,
     enabled: !!authUser,
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: 5000, // Refetch every 5 seconds for faster updates
   });
+
+  // Listen for immediate notification updates
+  useEffect(() => {
+    const handleNotificationCreated = () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
+    };
+    window.addEventListener("notificationCreated", handleNotificationCreated);
+    return () => window.removeEventListener("notificationCreated", handleNotificationCreated);
+  }, [queryClient]);
 
   const incomingRequests = friendRequests?.incomingReqs || [];
   const removedRequests = friendRequests?.removedReqs || [];

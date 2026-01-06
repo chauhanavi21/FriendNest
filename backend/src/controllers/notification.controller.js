@@ -89,11 +89,17 @@ export async function createMessageNotification(req, res) {
     });
 
     if (existingNotification) {
-      // Update existing notification with latest message preview
+      // Update existing notification with latest message preview and increment count
+      const currentCount = existingNotification.metadata?.count || 1;
       existingNotification.message = messagePreview || "New message";
-      existingNotification.metadata = { messagePreview: messagePreview || "New message" };
+      existingNotification.metadata = { 
+        messagePreview: messagePreview || "New message",
+        count: currentCount + 1,
+        lastMessageAt: new Date()
+      };
+      existingNotification.createdAt = new Date(); // Update timestamp to show it's new
       await existingNotification.save();
-      return res.status(200).json({ message: "Notification updated" });
+      return res.status(200).json({ message: "Notification updated", notification: existingNotification });
     }
 
     // Get sender info
@@ -110,6 +116,8 @@ export async function createMessageNotification(req, res) {
       channelId: channelId,
       metadata: {
         messagePreview: messagePreview || "New message",
+        count: 1,
+        lastMessageAt: new Date()
       },
     });
 

@@ -20,13 +20,15 @@ const NotificationsPage = () => {
   const { data: notificationsData, isLoading: loadingNotifications } = useQuery({
     queryKey: ["notifications"],
     queryFn: getNotifications,
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: 5000, // Refetch every 5 seconds for faster updates
   });
 
-  // Listen for notification creation events
+  // Listen for notification creation events - immediate update
   useEffect(() => {
     const handleNotificationCreated = () => {
+      // Immediately refetch notifications
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["friendRequests"] }); // Also update friend requests badge
     };
     window.addEventListener("notificationCreated", handleNotificationCreated);
     return () => window.removeEventListener("notificationCreated", handleNotificationCreated);
@@ -246,8 +248,14 @@ const NotificationsPage = () => {
                             {!notification.isRead && (
                               <div className="badge badge-info flex-shrink-0">
                                 <MessageSquareIcon className="h-3 w-3 mr-1" />
-                                <span className="hidden sm:inline">New</span>
-                                <span className="sm:hidden">N</span>
+                                {notification.metadata?.count > 1 ? (
+                                  <span>{notification.metadata.count}</span>
+                                ) : (
+                                  <>
+                                    <span className="hidden sm:inline">New</span>
+                                    <span className="sm:hidden">N</span>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>

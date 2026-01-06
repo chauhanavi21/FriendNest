@@ -96,14 +96,15 @@ export default function useMessageNotifications() {
           // Get sender ID from the message
           const senderId = event.message.user?.id || event.user.id;
 
-          // Create notification via API
-          try {
-            await createMessageNotification(senderId, channelId, messagePreview);
-            // Dispatch custom event to trigger query invalidation
-            window.dispatchEvent(new CustomEvent("notificationCreated"));
-          } catch (error) {
-            console.error("Error creating message notification:", error);
-          }
+          // Create notification via API (fire and forget for faster response)
+          createMessageNotification(senderId, channelId, messagePreview)
+            .then(() => {
+              // Dispatch custom event to trigger immediate query invalidation
+              window.dispatchEvent(new CustomEvent("notificationCreated"));
+            })
+            .catch((error) => {
+              console.error("Error creating message notification:", error);
+            });
         };
 
         // Subscribe to message.new event
