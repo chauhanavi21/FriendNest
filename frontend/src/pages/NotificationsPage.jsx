@@ -52,7 +52,9 @@ const NotificationsPage = () => {
   const incomingRequests = friendRequests?.incomingReqs || [];
   const acceptedRequests = friendRequests?.acceptedReqs || [];
   const removedRequests = friendRequests?.removedReqs || [];
-  const messageNotifications = notificationsData?.notifications?.filter(n => n.type === "message") || [];
+  const messageNotifications = (notificationsData?.notifications?.filter((n) => n.type === "message") || []).sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
   
   const isLoading = loadingFriendRequests || loadingNotifications;
 

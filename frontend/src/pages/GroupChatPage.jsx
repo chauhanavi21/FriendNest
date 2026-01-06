@@ -91,6 +91,8 @@ const GroupChatPage = () => {
 
         setChatClient(client);
         setChannel(currChannel);
+        // Notify global notification listener which channel is active to avoid duplicate alerts
+        window.dispatchEvent(new CustomEvent("currentChannelChanged", { detail: { channelId: group.streamChannelId } }));
         setLoading(false);
       } catch (error) {
         console.error("Error initializing chat:", error);
@@ -104,6 +106,10 @@ const GroupChatPage = () => {
     };
 
     initChat();
+    // Cleanup: clear active channel on unmount
+    return () => {
+      window.dispatchEvent(new CustomEvent("currentChannelChanged", { detail: { channelId: null } }));
+    };
   }, [tokenData, authUser, group]);
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
