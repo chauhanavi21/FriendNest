@@ -7,6 +7,37 @@ const streamClient = StreamChat.getInstance(
   process.env.STEAM_API_SECRET
 );
 
+// Helper: ensure a Stream channel exists for a group
+async function ensureGroupStreamChannel(group) {
+  if (!streamClient) return group;
+
+  try {
+    if (group.streamChannelId) {
+      return group;
+    }
+
+    const memberIds = group.members.map((m) => m.toString());
+    const channelId = `group-${group._id}`;
+    const channel = streamClient.channel("messaging", channelId, {
+      name: group.name,
+      members: memberIds,
+    });
+
+    await channel.create();
+    if (memberIds.length > 0) {
+      await channel.addMembers(memberIds);
+    }
+
+    group.streamChannelId = channelId;
+    await group.save();
+
+    return group;
+  } catch (error) {
+    console.error("Error ensuring Stream channel for group:", error);
+    return group;
+  }
+}
+
 // Create a new group
 export async function createGroup(req, res) {
   try {
@@ -130,7 +161,7 @@ export async function getGroupById(req, res) {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const group = await Group.findById(id)
+    let group = await Group.findById(id)
       .populate("creator", "fullName profilePic email")
       .populate("members", "fullName profilePic")
       .populate("events.organizer", "fullName profilePic")
@@ -139,6 +170,9 @@ export async function getGroupById(req, res) {
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
+
+    // Ensure Stream channel exists (for older groups that were created before chat integration)
+    group = await ensureGroupStreamChannel(group);
 
     const groupObj = group.toObject();
     groupObj.isMember = group.members.some(
