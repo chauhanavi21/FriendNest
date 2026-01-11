@@ -9,6 +9,7 @@ import userRoutes from "./routes/user.route.js";
 import chatRoutes from "./routes/chat.route.js";
 import groupRoutes from "./routes/group.route.js";
 import notificationRoutes from "./routes/notification.route.js";
+import adminRoutes from "./routes/admin.route.js";
 
 import { connectDB } from "./lib/db.js";
 
@@ -32,6 +33,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/groups", groupRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/admin", adminRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
