@@ -19,20 +19,25 @@ export async function getDashboardStats(req, res) {
     const monthAgo = new Date(now);
     monthAgo.setDate(monthAgo.getDate() - 30);
 
-    // User statistics
-    const totalUsers = await User.countDocuments({ role: "user" });
-    const onboardedUsers = await User.countDocuments({ isOnboarded: true, role: "user" });
+    // User statistics (exclude admins, include users without role field for backward compatibility)
+    const userQuery = { role: { $ne: "admin" } }; // This matches "user" and undefined/null
+    
+    const totalUsers = await User.countDocuments(userQuery);
+    const onboardedUsers = await User.countDocuments({
+      ...userQuery,
+      isOnboarded: true,
+    });
     const usersCreatedToday = await User.countDocuments({
+      ...userQuery,
       createdAt: { $gte: today },
-      role: "user",
     });
     const usersCreatedThisWeek = await User.countDocuments({
+      ...userQuery,
       createdAt: { $gte: weekAgo },
-      role: "user",
     });
     const usersCreatedThisMonth = await User.countDocuments({
+      ...userQuery,
       createdAt: { $gte: monthAgo },
-      role: "user",
     });
 
     // Group statistics
@@ -90,7 +95,7 @@ export async function getDashboardStats(req, res) {
     const unreadNotifications = await Notification.countDocuments({ isRead: false });
 
     // Friendship count (unique pairs)
-    const allUsers = await User.find({ role: "user" }).select("friends");
+    const allUsers = await User.find({ role: { $ne: "admin" } }).select("friends");
     let totalFriendships = 0;
     allUsers.forEach((user) => {
       totalFriendships += user.friends.length;
@@ -155,14 +160,19 @@ export async function getAllUsers(req, res) {
 
     const skip = (page - 1) * limit;
 
-    // Build query
-    let query = { role: "user" }; // Only regular users, not admins
+    // Build query (exclude admins, include users without role field for backward compatibility)
+    let query = {
+      $or: [{ role: "user" }, { role: { $exists: false } }],
+    };
 
     if (search) {
-      query.$or = [
-        { fullName: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-      ];
+      const searchConditions = {
+        $or: [
+          { fullName: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+        ],
+      };
+      query = { $and: [query, searchConditions] };
     }
 
     if (onboarded !== undefined) {
