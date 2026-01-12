@@ -19,6 +19,8 @@ import AdminLoginPage from "./pages/AdminLoginPage.jsx";
 import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
 import AdminLayout from "./components/AdminLayout.jsx";
 import DashboardPage from "./pages/admin/DashboardPage.jsx";
+import UsersPage from "./pages/admin/UsersPage.jsx";
+import GroupsPage from "./pages/admin/GroupsPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -221,6 +223,8 @@ const App = () => {
               <AdminLayout>
                 <Routes>
                   <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="users" element={<UsersPage />} />
+                  <Route path="groups" element={<GroupsPage />} />
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 </Routes>
               </AdminLayout>
