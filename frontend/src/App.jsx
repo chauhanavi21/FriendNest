@@ -15,6 +15,10 @@ import ChatRoomPage from "./pages/ChatRoomPage.jsx";
 import GroupsPage from "./pages/GroupsPage.jsx";
 import GroupDetailPage from "./pages/GroupDetailPage.jsx";
 import GroupChatPage from "./pages/GroupChatPage.jsx";
+import AdminLoginPage from "./pages/AdminLoginPage.jsx";
+import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
+import AdminLayout from "./components/AdminLayout.jsx";
+import DashboardPage from "./pages/admin/DashboardPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -205,6 +209,22 @@ const App = () => {
             ) : (
               <Navigate to="/login" />
             )
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route
+          path="/admin/*"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout>
+                <Routes>
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                </Routes>
+              </AdminLayout>
+            </AdminProtectedRoute>
           }
         />
       </Routes>
