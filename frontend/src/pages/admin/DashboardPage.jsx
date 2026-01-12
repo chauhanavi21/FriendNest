@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAdminDashboardStats } from "../../lib/api";
-import { UsersIcon, UserCircleIcon, CalendarIcon, UserCheckIcon, BellIcon, HeartIcon } from "lucide-react";
+import { UsersIcon, UserCircleIcon, CalendarIcon, UserCheckIcon, BellIcon, HeartIcon, ClockIcon } from "lucide-react";
+import Avatar from "../../components/Avatar";
+import { getLanguageFlag } from "../../components/FriendCard";
 
 const DashboardPage = () => {
   const { data, isLoading, error } = useQuery({
@@ -184,6 +186,100 @@ const DashboardPage = () => {
                 <span>Unread Notifications:</span>
                 <span className="font-semibold">{stats?.notifications?.unread || 0}</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Users */}
+          <div className="card bg-base-200 shadow">
+            <div className="card-body">
+              <h3 className="card-title text-lg">Recent Users</h3>
+              {stats?.recentActivity?.users?.length > 0 ? (
+                <div className="space-y-3 mt-4">
+                  {stats.recentActivity.users.map((user) => (
+                    <div key={user._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-base-300 transition">
+                      <Avatar src={user.profilePic} alt={user.fullName} size="sm" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{user.fullName || "N/A"}</p>
+                        <p className="text-xs opacity-70 truncate">{user.email}</p>
+                      </div>
+                      <div className="text-xs opacity-70">
+                        <ClockIcon className="size-3 inline mr-1" />
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm opacity-70 mt-4">No recent users</p>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Groups */}
+          <div className="card bg-base-200 shadow">
+            <div className="card-body">
+              <h3 className="card-title text-lg">Recent Groups</h3>
+              {stats?.recentActivity?.groups?.length > 0 ? (
+                <div className="space-y-3 mt-4">
+                  {stats.recentActivity.groups.map((group) => (
+                    <div key={group._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-base-300 transition">
+                      {group.coverImage ? (
+                        <img
+                          src={group.coverImage}
+                          alt={group.name}
+                          className="w-10 h-10 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                          <UserCircleIcon className="size-5 text-primary" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{group.name}</p>
+                        <div className="flex items-center gap-1 text-xs opacity-70">
+                          <span>{getLanguageFlag(group.language)}</span>
+                          <span>{group.language}</span>
+                        </div>
+                      </div>
+                      <div className="text-xs opacity-70">
+                        <ClockIcon className="size-3 inline mr-1" />
+                        {new Date(group.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm opacity-70 mt-4">No recent groups</p>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Events */}
+          <div className="card bg-base-200 shadow">
+            <div className="card-body">
+              <h3 className="card-title text-lg">Recent Events</h3>
+              {stats?.recentActivity?.events?.length > 0 ? (
+                <div className="space-y-3 mt-4">
+                  {stats.recentActivity.events.map((event, idx) => (
+                    <div key={event._id || idx} className="p-2 rounded-lg hover:bg-base-300 transition">
+                      <p className="font-semibold text-sm truncate">{event.title}</p>
+                      <p className="text-xs opacity-70 truncate">{event.groupName}</p>
+                      <div className="flex items-center gap-1 text-xs opacity-70 mt-1">
+                        <CalendarIcon className="size-3" />
+                        <span>{new Date(event.date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm opacity-70 mt-4">No recent events</p>
+              )}
             </div>
           </div>
         </div>

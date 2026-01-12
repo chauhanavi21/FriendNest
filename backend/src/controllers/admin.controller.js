@@ -103,6 +103,37 @@ export async function getDashboardStats(req, res) {
     // Divide by 2 since each friendship is counted twice (user A has B, user B has A)
     totalFriendships = Math.floor(totalFriendships / 2);
 
+    // Recent Activity - Get last 5 users, groups, and events
+    const recentUsers = await User.find(userQuery)
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    const recentGroups = await Group.find()
+      .populate("creator", "fullName profilePic")
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    // Get recent events from all groups
+    const allGroupsForEvents = await Group.find().select("events name").lean();
+    const allEvents = [];
+    allGroupsForEvents.forEach((group) => {
+      if (group.events && group.events.length > 0) {
+        group.events.forEach((event) => {
+          allEvents.push({
+            ...event,
+            groupName: group.name,
+            groupId: group._id,
+          });
+        });
+      }
+    });
+    const recentEvents = allEvents
+      .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+      .slice(0, 5);
+
     res.status(200).json({
       success: true,
       stats: {
@@ -138,6 +169,11 @@ export async function getDashboardStats(req, res) {
           unread: unreadNotifications,
         },
         friendships: totalFriendships,
+        recentActivity: {
+          users: recentUsers,
+          groups: recentGroups,
+          events: recentEvents,
+        },
       },
     });
   } catch (error) {

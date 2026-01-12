@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAllAdminGroups, deleteAdminGroup } from "../../lib/api";
-import { SearchIcon, TrashIcon, UsersIcon, CalendarIcon, GlobeIcon } from "lucide-react";
+import { getAllAdminGroups, deleteAdminGroup, getAdminGroupById } from "../../lib/api";
+import { SearchIcon, TrashIcon, UsersIcon, CalendarIcon, GlobeIcon, EyeIcon, MapPinIcon } from "lucide-react";
 import Avatar from "../../components/Avatar";
 import toast from "react-hot-toast";
 import { getLanguageFlag } from "../../components/FriendCard";
@@ -12,6 +12,7 @@ const GroupsPage = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [groupToDelete, setGroupToDelete] = useState(null);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["adminGroups", page, limit, searchQuery],
@@ -34,6 +35,13 @@ const GroupsPage = () => {
   const groups = data?.groups || [];
   const totalPages = data?.pagination?.pages || 1;
   const totalGroups = data?.pagination?.total || 0;
+
+  // Fetch group details when selected
+  const { data: groupDetails } = useQuery({
+    queryKey: ["adminGroupDetails", selectedGroupId],
+    queryFn: () => getAdminGroupById(selectedGroupId),
+    enabled: !!selectedGroupId,
+  });
 
   const handleDelete = (groupId, groupName) => {
     setGroupToDelete({ id: groupId, name: groupName });
@@ -168,14 +176,23 @@ const GroupsPage = () => {
                       </div>
                     </td>
                     <td>
-                      <button
-                        onClick={() => handleDelete(group._id, group.name)}
-                        className="btn btn-ghost btn-sm btn-error"
-                        disabled={isDeleting}
-                      >
-                        <TrashIcon className="size-4" />
-                        Delete
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setSelectedGroupId(group._id)}
+                          className="btn btn-ghost btn-sm"
+                        >
+                          <EyeIcon className="size-4" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDelete(group._id, group.name)}
+                          className="btn btn-ghost btn-sm btn-error"
+                          disabled={isDeleting}
+                        >
+                          <TrashIcon className="size-4" />
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -206,6 +223,133 @@ const GroupsPage = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Group Detail Modal */}
+      {selectedGroupId && (
+        <dialog className="modal modal-open">
+          <div className="modal-box max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="font-bold text-lg mb-4">Group Details</h3>
+            {groupDetails?.group ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  {groupDetails.group.coverImage ? (
+                    <img
+                      src={groupDetails.group.coverImage}
+                      alt={groupDetails.group.name}
+                      className="w-20 h-20 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <UsersIcon className="size-10 text-primary" />
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="text-xl font-bold">{groupDetails.group.name}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-2xl">{getLanguageFlag(groupDetails.group.language)}</span>
+                      <span>{groupDetails.group.language}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="divider"></div>
+
+                {groupDetails.group.description && (
+                  <div>
+                    <p className="text-sm opacity-70 mb-2">Description</p>
+                    <p>{groupDetails.group.description}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm opacity-70">Members</p>
+                    <p className="font-semibold flex items-center gap-2">
+                      <UsersIcon className="size-4" />
+                      {groupDetails.group.members?.length || 0}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-70">Events</p>
+                    <p className="font-semibold flex items-center gap-2">
+                      <CalendarIcon className="size-4" />
+                      {groupDetails.group.events?.length || 0}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-70">Created</p>
+                    <p className="font-semibold">
+                      {new Date(groupDetails.group.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {groupDetails.group.creator && (
+                    <div>
+                      <p className="text-sm opacity-70">Creator</p>
+                      <div className="flex items-center gap-2">
+                        <Avatar src={groupDetails.group.creator.profilePic} alt={groupDetails.group.creator.fullName} size="xs" />
+                        <span className="font-semibold">{groupDetails.group.creator.fullName}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {groupDetails.group.members && groupDetails.group.members.length > 0 && (
+                  <>
+                    <div className="divider"></div>
+                    <div>
+                      <p className="text-sm opacity-70 mb-2">Members ({groupDetails.group.members.length})</p>
+                      <div className="flex flex-wrap gap-2">
+                        {groupDetails.group.members.map((member) => (
+                          <div key={member._id} className="flex items-center gap-2 badge badge-outline">
+                            <Avatar src={member.profilePic} alt={member.fullName} size="xs" />
+                            <span>{member.fullName}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {groupDetails.group.events && groupDetails.group.events.length > 0 && (
+                  <>
+                    <div className="divider"></div>
+                    <div>
+                      <p className="text-sm opacity-70 mb-2">Events ({groupDetails.group.events.length})</p>
+                      <div className="space-y-2">
+                        {groupDetails.group.events.map((event) => (
+                          <div key={event._id} className="card bg-base-200 p-3">
+                            <p className="font-semibold">{event.title}</p>
+                            <p className="text-xs opacity-70">{event.description}</p>
+                            <div className="flex items-center gap-2 mt-2 text-xs">
+                              <CalendarIcon className="size-3" />
+                              <span>{new Date(event.date).toLocaleDateString()}</span>
+                              {event.location && (
+                                <>
+                                  <MapPinIcon className="size-3 ml-2" />
+                                  <span>{event.location}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="flex justify-center py-8">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            )}
+            <div className="modal-action">
+              <button className="btn" onClick={() => setSelectedGroupId(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </dialog>
       )}
 
       {/* Delete Confirmation Modal */}

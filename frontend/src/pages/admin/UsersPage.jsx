@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAllAdminUsers, deleteAdminUser } from "../../lib/api";
-import { SearchIcon, TrashIcon, UserIcon, MailIcon, CalendarIcon, CheckCircleIcon, XCircleIcon } from "lucide-react";
+import { getAllAdminUsers, deleteAdminUser, getAdminUserById } from "../../lib/api";
+import { SearchIcon, TrashIcon, UserIcon, MailIcon, CalendarIcon, CheckCircleIcon, XCircleIcon, EyeIcon, MapPinIcon, GlobeIcon } from "lucide-react";
 import Avatar from "../../components/Avatar";
 import toast from "react-hot-toast";
 
@@ -11,6 +11,7 @@ const UsersPage = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["adminUsers", page, limit, searchQuery],
@@ -33,6 +34,13 @@ const UsersPage = () => {
   const users = data?.users || [];
   const totalPages = data?.pagination?.pages || 1;
   const totalUsers = data?.pagination?.total || 0;
+
+  // Fetch user details when selected
+  const { data: userDetails } = useQuery({
+    queryKey: ["adminUserDetails", selectedUserId],
+    queryFn: () => getAdminUserById(selectedUserId),
+    enabled: !!selectedUserId,
+  });
 
   const handleDelete = (userId, userName) => {
     setUserToDelete({ id: userId, name: userName });
@@ -162,14 +170,23 @@ const UsersPage = () => {
                       </div>
                     </td>
                     <td>
-                      <button
-                        onClick={() => handleDelete(user._id, user.fullName || user.email)}
-                        className="btn btn-ghost btn-sm btn-error"
-                        disabled={isDeleting}
-                      >
-                        <TrashIcon className="size-4" />
-                        Delete
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setSelectedUserId(user._id)}
+                          className="btn btn-ghost btn-sm"
+                        >
+                          <EyeIcon className="size-4" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user._id, user.fullName || user.email)}
+                          className="btn btn-ghost btn-sm btn-error"
+                          disabled={isDeleting}
+                        >
+                          <TrashIcon className="size-4" />
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -200,6 +217,129 @@ const UsersPage = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* User Detail Modal */}
+      {selectedUserId && (
+        <dialog className="modal modal-open">
+          <div className="modal-box max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="font-bold text-lg mb-4">User Details</h3>
+            {userDetails?.user ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Avatar src={userDetails.user.profilePic} alt={userDetails.user.fullName} size="lg" />
+                  <div>
+                    <h4 className="text-xl font-bold">{userDetails.user.fullName || "N/A"}</h4>
+                    <p className="text-sm opacity-70">{userDetails.user.email}</p>
+                  </div>
+                </div>
+
+                <div className="divider"></div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm opacity-70">Location</p>
+                    <p className="font-semibold flex items-center gap-2">
+                      <MapPinIcon className="size-4" />
+                      {userDetails.user.location || "Not set"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-70">Onboarded</p>
+                    <p>
+                      {userDetails.user.isOnboarded ? (
+                        <span className="badge badge-success">Yes</span>
+                      ) : (
+                        <span className="badge badge-error">No</span>
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-70">Native Language</p>
+                    <p className="font-semibold flex items-center gap-2">
+                      <GlobeIcon className="size-4" />
+                      {userDetails.user.nativeLanguage || "Not set"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-70">Learning Language</p>
+                    <p className="font-semibold flex items-center gap-2">
+                      <GlobeIcon className="size-4" />
+                      {userDetails.user.learningLanguage || "Not set"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-70">Friends</p>
+                    <p className="font-semibold">{userDetails.user.friends?.length || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-70">Groups</p>
+                    <p className="font-semibold">{userDetails.groups?.length || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-70">Created</p>
+                    <p className="font-semibold">
+                      {new Date(userDetails.user.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                {userDetails.user.bio && (
+                  <>
+                    <div className="divider"></div>
+                    <div>
+                      <p className="text-sm opacity-70 mb-2">Bio</p>
+                      <p>{userDetails.user.bio}</p>
+                    </div>
+                  </>
+                )}
+
+                {userDetails.user.friends && userDetails.user.friends.length > 0 && (
+                  <>
+                    <div className="divider"></div>
+                    <div>
+                      <p className="text-sm opacity-70 mb-2">Friends ({userDetails.user.friends.length})</p>
+                      <div className="flex flex-wrap gap-2">
+                        {userDetails.user.friends.map((friend) => (
+                          <div key={friend._id} className="flex items-center gap-2 badge badge-outline">
+                            <Avatar src={friend.profilePic} alt={friend.fullName} size="xs" />
+                            <span>{friend.fullName}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {userDetails.groups && userDetails.groups.length > 0 && (
+                  <>
+                    <div className="divider"></div>
+                    <div>
+                      <p className="text-sm opacity-70 mb-2">Groups ({userDetails.groups.length})</p>
+                      <div className="space-y-2">
+                        {userDetails.groups.map((group) => (
+                          <div key={group._id} className="card bg-base-200 p-3">
+                            <p className="font-semibold">{group.name}</p>
+                            <p className="text-xs opacity-70">{group.language}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="flex justify-center py-8">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            )}
+            <div className="modal-action">
+              <button className="btn" onClick={() => setSelectedUserId(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </dialog>
       )}
 
       {/* Delete Confirmation Modal */}
