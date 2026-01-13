@@ -1,5 +1,6 @@
 import express from "express";
 import { requireAdmin } from "../middleware/auth.middleware.js";
+import { adminRateLimiter } from "../middleware/rateLimit.middleware.js";
 import {
   getDashboardStats,
   getAllUsers,
@@ -11,6 +12,9 @@ import {
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
+
+// Apply rate limiting to all admin routes
+router.use(adminRateLimiter);
 
 // Test route
 router.get("/test", requireAdmin, (req, res) => {
