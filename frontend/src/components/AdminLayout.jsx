@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router";
-import { LayoutDashboardIcon, UsersIcon, UserCircleIcon, LogOutIcon } from "lucide-react";
+import { LayoutDashboardIcon, UsersIcon, UserCircleIcon, LogOutIcon, BarChart3Icon } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
 import Avatar from "./Avatar";
@@ -63,6 +63,16 @@ const AdminLayout = ({ children }) => {
             >
               <UserCircleIcon className="size-5 text-base-content opacity-70" />
               <span>Groups</span>
+            </Link>
+
+            <Link
+              to="/admin/statistics"
+              className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case h-12 min-h-12 ${
+                currentPath.startsWith("/admin/statistics") ? "btn-active" : ""
+              }`}
+            >
+              <BarChart3Icon className="size-5 text-base-content opacity-70" />
+              <span>Analytics</span>
             </Link>
           </nav>
 

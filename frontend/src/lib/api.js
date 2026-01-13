@@ -238,3 +238,9 @@ export async function deleteAdminGroup(groupId) {
   const response = await axiosInstance.delete(`/admin/groups/${groupId}`);
   return response.data;
 }
+
+// Analytics
+export async function getAdminAnalytics() {
+  const response = await axiosInstance.get("/admin/stats/analytics");
+  return response.data;
+}

@@ -9,6 +9,7 @@ import {
   getAllGroups,
   getGroupById,
   deleteGroup,
+  getAnalytics,
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
@@ -32,6 +33,7 @@ router.get("/test", requireAdmin, (req, res) => {
 
 // Statistics routes
 router.get("/stats/dashboard", requireAdmin, getDashboardStats);
+router.get("/stats/analytics", requireAdmin, getAnalytics);
 
 // User management routes
 router.get("/users", requireAdmin, getAllUsers);

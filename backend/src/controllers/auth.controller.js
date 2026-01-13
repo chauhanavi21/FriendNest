@@ -78,12 +78,17 @@ export async function login(req, res) {
     const isPasswordCorrect = await user.matchPassword(password);
     if (!isPasswordCorrect) return res.status(401).json({ message: "Invalid email or password" });
 
+    // Extended session for admin users (30 days), regular users (7 days)
+    const isAdmin = user.role === "admin";
+    const expiresIn = isAdmin ? "30d" : "7d";
+    const maxAge = isAdmin ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
-      expiresIn: "7d",
+      expiresIn,
     });
 
     res.cookie("jwt", token, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge,
       httpOnly: true,
       sameSite: "strict", 
       secure: process.env.NODE_ENV === "production",

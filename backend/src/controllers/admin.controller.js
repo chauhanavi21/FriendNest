@@ -465,6 +465,120 @@ export async function getGroupById(req, res) {
 }
 
 // Delete group (admin can delete any group)
+// ==================== ANALYTICS ====================
+
+// Get analytics data for charts (user growth, activity trends, etc.)
+export async function getAnalytics(req, res) {
+  try {
+    const now = new Date();
+    const daysAgo = (days) => {
+      const date = new Date(now);
+      date.setDate(date.getDate() - days);
+      date.setHours(0, 0, 0, 0);
+      return date;
+    };
+
+    // User growth over last 30 days (daily)
+    const userGrowthData = [];
+    for (let i = 29; i >= 0; i--) {
+      const startDate = daysAgo(i + 1);
+      const endDate = daysAgo(i);
+      const count = await User.countDocuments({
+        role: { $ne: "admin" },
+        createdAt: { $gte: startDate, $lt: endDate },
+      });
+      userGrowthData.push({
+        date: endDate.toISOString().split("T")[0],
+        users: count,
+      });
+    }
+
+    // Group growth over last 30 days
+    const groupGrowthData = [];
+    for (let i = 29; i >= 0; i--) {
+      const startDate = daysAgo(i + 1);
+      const endDate = daysAgo(i);
+      const count = await Group.countDocuments({
+        createdAt: { $gte: startDate, $lt: endDate },
+      });
+      groupGrowthData.push({
+        date: endDate.toISOString().split("T")[0],
+        groups: count,
+      });
+    }
+
+    // Friend requests over last 30 days
+    const friendRequestData = [];
+    for (let i = 29; i >= 0; i--) {
+      const startDate = daysAgo(i + 1);
+      const endDate = daysAgo(i);
+      const count = await FriendRequest.countDocuments({
+        createdAt: { $gte: startDate, $lt: endDate },
+      });
+      friendRequestData.push({
+        date: endDate.toISOString().split("T")[0],
+        requests: count,
+      });
+    }
+
+    // Users by native language (top 10)
+    const usersByLanguage = await User.aggregate([
+      { $match: { role: { $ne: "admin" }, nativeLanguage: { $exists: true, $ne: "" } } },
+      { $group: { _id: "$nativeLanguage", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
+
+    // Groups by language breakdown
+    const groupsByLanguage = await Group.aggregate([
+      { $group: { _id: "$language", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+
+    // Activity by day of week
+    const activityByDayOfWeek = [];
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    for (let day = 0; day < 7; day++) {
+      const dayStart = new Date(now);
+      dayStart.setDate(dayStart.getDate() - (dayStart.getDay() - day + 7) % 7);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 7);
+
+      const userCount = await User.countDocuments({
+        role: { $ne: "admin" },
+        createdAt: { $gte: dayStart, $lt: dayEnd },
+      });
+
+      activityByDayOfWeek.push({
+        day: dayNames[day],
+        users: userCount,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      analytics: {
+        userGrowth: userGrowthData,
+        groupGrowth: groupGrowthData,
+        friendRequestGrowth: friendRequestData,
+        usersByLanguage: usersByLanguage.map((item) => ({
+          language: item._id,
+          count: item.count,
+        })),
+        groupsByLanguage: groupsByLanguage.map((item) => ({
+          language: item._id,
+          count: item.count,
+        })),
+        activityByDayOfWeek,
+      },
+    });
+  } catch (error) {
+    console.error("Error in getAnalytics:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 export async function deleteGroup(req, res) {
   try {
     const { id } = req.params;
