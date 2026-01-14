@@ -36,12 +36,15 @@ export async function signup(req, res) {
     });
 
     try {
-      await upsertStreamUser({
-        id: newUser._id.toString(),
-        name: newUser.fullName,
-        image: newUser.profilePic || "",
-      });
-      console.log(`Stream user created for ${newUser.fullName}`);
+      await upsertStreamUser(
+        {
+          id: newUser._id.toString(),
+          name: newUser.fullName,
+          image: newUser.profilePic || "",
+        },
+        newUser.role // Pass the user's role from database
+      );
+      console.log(`Stream user created for ${newUser.fullName} with role: ${newUser.role}`);
     } catch (error) {
       console.log("Error creating Stream user:", error);
     }
@@ -137,12 +140,15 @@ export async function onboard(req, res) {
     if (!updatedUser) return res.status(404).json({ message: "User not found" });
 
     try {
-      await upsertStreamUser({
-        id: updatedUser._id.toString(),
-        name: updatedUser.fullName,
-        image: updatedUser.profilePic || "",
-      });
-      console.log(`Stream user updated after onboarding for ${updatedUser.fullName}`);
+      await upsertStreamUser(
+        {
+          id: updatedUser._id.toString(),
+          name: updatedUser.fullName,
+          image: updatedUser.profilePic || "",
+        },
+        updatedUser.role // Pass the user's role from database
+      );
+      console.log(`Stream user updated after onboarding for ${updatedUser.fullName} with role: ${updatedUser.role}`);
     } catch (streamError) {
       console.log("Error updating Stream user during onboarding:", streamError.message);
     }

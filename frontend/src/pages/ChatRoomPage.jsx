@@ -55,14 +55,17 @@ const ChatRoomPage = () => {
       try {
         const client = StreamChat.getInstance(STREAM_API_KEY);
 
-        await client.connectUser(
-          {
-            id: authUser._id,
-            name: authUser.fullName,
-            image: authUser.profilePic,
-          },
-          tokenData.token
-        );
+        // Only connect if not already connected
+        if (!client.userID || client.userID !== authUser._id) {
+          await client.connectUser(
+            {
+              id: authUser._id,
+              name: authUser.fullName,
+              image: authUser.profilePic,
+            },
+            tokenData.token
+          );
+        }
 
         setChatClient(client);
         setLoading(false);
@@ -92,6 +95,16 @@ const ChatRoomPage = () => {
           members: [authUser._id, selectedFriendId],
         });
 
+        // Create channel if it doesn't exist, then watch
+        try {
+          await currChannel.create();
+        } catch (createError) {
+          // Channel might already exist, that's okay
+          if (!createError.message?.includes("already exists")) {
+            console.warn("Channel creation warning:", createError);
+          }
+        }
+        
         await currChannel.watch();
 
         setChannel(currChannel);
@@ -114,12 +127,31 @@ const ChatRoomPage = () => {
       for (const friend of friends) {
         try {
           const channelId = [authUser._id, friend._id].sort().join("-");
-          const friendChannel = chatClient.channel("messaging", channelId);
+          const friendChannel = chatClient.channel("messaging", channelId, {
+            members: [authUser._id, friend._id],
+          });
+          
+          // Create channel if it doesn't exist, then watch
+          try {
+            await friendChannel.create();
+          } catch (createError) {
+            // Channel might already exist, that's okay
+            if (!createError.message?.includes("already exists")) {
+              // If it's a permission error, skip this channel
+              if (createError.message?.includes("permission") || createError.message?.includes("not allowed")) {
+                continue;
+              }
+            }
+          }
+          
           await friendChannel.watch();
           const unread = friendChannel.countUnread();
           counts[friend._id] = unread;
         } catch (error) {
-          console.error(`Error getting unread count for ${friend._id}:`, error);
+          // Silently skip channels that can't be accessed (permission issues, etc.)
+          if (!error.message?.includes("permission") && !error.message?.includes("not allowed")) {
+            console.error(`Error getting unread count for ${friend._id}:`, error);
+          }
         }
       }
       setUnreadCounts(counts);
