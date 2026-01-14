@@ -41,11 +41,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
     friends: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -85,14 +80,6 @@ const userSchema = new mongoose.Schema(
         },
       },
     },
-    resetPasswordToken: {
-      type: String,
-      default: null,
-    },
-    resetPasswordExpires: {
-      type: Date,
-      default: null,
-    },
   },
   { timestamps: true }
 );
@@ -113,9 +100,6 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
   const isPasswordCorrect = await bcrypt.compare(enteredPassword, this.password);
   return isPasswordCorrect;
 };
-
-// Index for role field
-userSchema.index({ role: 1 });
 
 const User = mongoose.model("User", userSchema);
 

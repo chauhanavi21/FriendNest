@@ -247,15 +247,12 @@ export async function updateProfile(req, res) {
     // Update Stream user if profile pic or name changed
     try {
       const { upsertStreamUser } = await import("../lib/stream.js");
-      await upsertStreamUser(
-        {
-          id: updatedUser._id.toString(),
-          name: updatedUser.fullName,
-          image: updatedUser.profilePic || "",
-        },
-        updatedUser.role // Pass the user's role from database
-      );
-      console.log(`Stream user updated for ${updatedUser.fullName} with role: ${updatedUser.role}`);
+      await upsertStreamUser({
+        id: updatedUser._id.toString(),
+        name: updatedUser.fullName,
+        image: updatedUser.profilePic || "",
+      });
+      console.log(`Stream user updated for ${updatedUser.fullName}`);
     } catch (streamError) {
       console.log("Error updating Stream user:", streamError.message);
     }
@@ -535,35 +532,6 @@ export async function deleteAccount(req, res) {
       return res.status(401).json({ message: "Incorrect password" });
     }
 
-    // Import required models
-    const Group = (await import("../models/Group.js")).default;
-    const FriendRequest = (await import("../models/FriendRequest.js")).default;
-    const Notification = (await import("../models/Notification.js")).default;
-    const { streamClient } = await import("../lib/stream.js");
-
-    // Remove user from all friends' friends lists
-    await User.updateMany({ friends: userId }, { $pull: { friends: userId } });
-
-    // Remove user from all groups
-    await Group.updateMany({ members: userId }, { $pull: { members: userId } });
-
-    // Delete friend requests involving this user
-    await FriendRequest.deleteMany({
-      $or: [{ sender: userId }, { recipient: userId }],
-    });
-
-    // Delete notifications for this user
-    await Notification.deleteMany({ user: userId });
-
-    // Delete Stream user
-    try {
-      await streamClient.deleteUser(userId.toString());
-    } catch (streamError) {
-      console.error("Error deleting Stream user:", streamError);
-      // Continue even if Stream deletion fails
-    }
-
-    // Delete user from database
     await User.findByIdAndDelete(userId);
 
     res.clearCookie("jwt");

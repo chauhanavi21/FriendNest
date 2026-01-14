@@ -68,12 +68,13 @@ async function updateStreamUsers() {
         });
         adminCount++;
       } else {
-        // Remove role for regular users (don't set role property at all)
+        // Try to explicitly remove role by setting it to null/empty
+        // Stream Chat might require explicit null to remove role
         updates.push({
           id: userId,
           name: user.fullName || "User",
           image: user.profilePic || "", // Include avatar
-          // Don't set role - this allows default permissions
+          role: null, // Explicitly set to null to try removing it
         });
         regularUserCount++;
       }

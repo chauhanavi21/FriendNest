@@ -36,15 +36,12 @@ export async function signup(req, res) {
     });
 
     try {
-      await upsertStreamUser(
-        {
-          id: newUser._id.toString(),
-          name: newUser.fullName,
-          image: newUser.profilePic || "",
-        },
-        newUser.role // Pass the user's role from database
-      );
-      console.log(`Stream user created for ${newUser.fullName} with role: ${newUser.role}`);
+      await upsertStreamUser({
+        id: newUser._id.toString(),
+        name: newUser.fullName,
+        image: newUser.profilePic || "",
+      });
+      console.log(`Stream user created for ${newUser.fullName}`);
     } catch (error) {
       console.log("Error creating Stream user:", error);
     }
@@ -81,17 +78,12 @@ export async function login(req, res) {
     const isPasswordCorrect = await user.matchPassword(password);
     if (!isPasswordCorrect) return res.status(401).json({ message: "Invalid email or password" });
 
-    // Extended session for admin users (30 days), regular users (7 days)
-    const isAdmin = user.role === "admin";
-    const expiresIn = isAdmin ? "30d" : "7d";
-    const maxAge = isAdmin ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
-
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
-      expiresIn,
+      expiresIn: "7d",
     });
 
     res.cookie("jwt", token, {
-      maxAge,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: "strict", 
       secure: process.env.NODE_ENV === "production",
@@ -140,15 +132,12 @@ export async function onboard(req, res) {
     if (!updatedUser) return res.status(404).json({ message: "User not found" });
 
     try {
-      await upsertStreamUser(
-        {
-          id: updatedUser._id.toString(),
-          name: updatedUser.fullName,
-          image: updatedUser.profilePic || "",
-        },
-        updatedUser.role // Pass the user's role from database
-      );
-      console.log(`Stream user updated after onboarding for ${updatedUser.fullName} with role: ${updatedUser.role}`);
+      await upsertStreamUser({
+        id: updatedUser._id.toString(),
+        name: updatedUser.fullName,
+        image: updatedUser.profilePic || "",
+      });
+      console.log(`Stream user updated after onboarding for ${updatedUser.fullName}`);
     } catch (streamError) {
       console.log("Error updating Stream user during onboarding:", streamError.message);
     }

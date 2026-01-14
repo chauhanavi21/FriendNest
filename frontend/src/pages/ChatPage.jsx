@@ -58,17 +58,14 @@ const ChatPage = () => {
 
         const client = StreamChat.getInstance(STREAM_API_KEY);
 
-        // Only connect if not already connected
-        if (!client.userID || client.userID !== authUser._id) {
-          await client.connectUser(
-            {
-              id: authUser._id,
-              name: authUser.fullName,
-              image: authUser.profilePic,
-            },
-            tokenData.token
-          );
-        }
+        await client.connectUser(
+          {
+            id: authUser._id,
+            name: authUser.fullName,
+            image: authUser.profilePic,
+          },
+          tokenData.token
+        );
 
        
         const channelId = [authUser._id, targetUserId].sort().join("-");
@@ -78,16 +75,6 @@ const ChatPage = () => {
           members: [authUser._id, targetUserId],
         });
 
-        // Create channel if it doesn't exist, then watch
-        try {
-          await currChannel.create();
-        } catch (createError) {
-          // Channel might already exist, that's okay
-          if (!createError.message?.includes("already exists")) {
-            console.warn("Channel creation warning:", createError);
-          }
-        }
-        
         await currChannel.watch();
 
         setChatClient(client);
