@@ -16,11 +16,20 @@ async function ensureGroupStreamChannel(group) {
       return group;
     }
 
-    const memberIds = group.members.map((m) => m.toString());
+    // Extract user IDs - handle both ObjectId and populated objects
+    const memberIds = group.members.map((m) => {
+      // If populated object, use _id; otherwise use the value directly (ObjectId)
+      return m._id ? m._id.toString() : m.toString();
+    });
+    
+    // Extract creator ID - handle both ObjectId and populated object
+    const creatorId = group.creator._id ? group.creator._id.toString() : group.creator.toString();
+    
     const channelId = `group-${group._id}`;
     const channel = streamClient.channel("messaging", channelId, {
       name: group.name,
       members: memberIds,
+      created_by_id: creatorId,
     });
 
     await channel.create();
@@ -66,6 +75,7 @@ export async function createGroup(req, res) {
       const channel = streamClient.channel("messaging", channelId, {
         name: group.name,
         members: [userId],
+        created_by_id: userId,
       });
 
       await channel.create();
