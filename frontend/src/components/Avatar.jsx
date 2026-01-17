@@ -12,9 +12,16 @@ const Avatar = ({ src, alt, className = "", size = "md" }) => {
     xl: "w-16 h-16",
   };
 
+  // Clean and validate src - trim whitespace and check if it's a valid URL
+  const cleanSrc = src?.trim() || "";
+  const isValidSrc = cleanSrc && cleanSrc.length > 0;
+
   // Reset loading and error state when src changes
   useEffect(() => {
-    if (src) {
+    const cleanedSrc = src?.trim() || "";
+    const isValid = cleanedSrc && cleanedSrc.length > 0;
+    
+    if (isValid) {
       setIsLoading(true);
       setHasError(false);
     } else {
@@ -29,7 +36,7 @@ const Avatar = ({ src, alt, className = "", size = "md" }) => {
   // Combine classes: base classes, size classes, then custom className (so className can override)
   const baseClasses = `rounded-full bg-base-300 flex-shrink-0 flex items-center justify-center overflow-hidden ${sizeClasses[size]}${cleanClassName ? ` ${cleanClassName}` : ""}`;
 
-  if (hasError || !src) {
+  if (hasError || !isValidSrc) {
     return (
       <div className={baseClasses}>
         <UserIcon className="w-1/2 h-1/2 text-base-content opacity-50" />
@@ -45,7 +52,7 @@ const Avatar = ({ src, alt, className = "", size = "md" }) => {
         </div>
       )}
       <img
-        src={src}
+        src={cleanSrc}
         alt={alt || "Avatar"}
         loading="lazy"
         className={`w-full h-full object-cover transition-opacity duration-200 rounded-full ${
