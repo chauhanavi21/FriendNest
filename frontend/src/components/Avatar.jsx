@@ -36,7 +36,10 @@ const Avatar = ({ src, alt, className = "", size = "md" }) => {
         className={`w-full h-full object-cover transition-opacity duration-200 rounded-full ${
           isLoading ? "opacity-0" : "opacity-100"
         }`}
-        onLoad={() => setIsLoading(false)}
+        onLoad={() => {
+          // Small delay to keep the skeleton a bit longer for a smoother (slower) reveal
+          setTimeout(() => setIsLoading(false), 200);
+        }}
         onError={() => {
           setIsLoading(false);
           setHasError(true);

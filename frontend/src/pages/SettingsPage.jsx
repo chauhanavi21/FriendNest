@@ -573,6 +573,8 @@ const SettingsPage = () => {
                         <option value="zh">Chinese</option>
                         <option value="ar">Arabic</option>
                         <option value="hi">Hindi</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="bn">Bengali</option>
                       </select>
                       <label className="label">
                         <span className="label-text-alt opacity-70">

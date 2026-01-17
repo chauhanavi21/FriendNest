@@ -56,17 +56,13 @@ async function fixStreamUsers() {
       const userId = user._id.toString();
 
       try {
-        // Update user WITHOUT any role field - this should allow default permissions
-        await streamClient.upsertUsers([
-          {
-            id: userId,
-            name: user.fullName || "User",
-            image: user.profilePic || "",
-            // Explicitly DO NOT set role - Stream should use default permissions
-          },
-        ]);
+        // Use partialUpdateUser to explicitly set role to null (remove role)
+        await streamClient.partialUpdateUser({
+          id: userId,
+          set: { role: null }, // Explicitly remove the role
+        });
 
-        console.log(`   ✅ Updated: ${user.fullName || userId}`);
+        console.log(`   ✅ Removed role from: ${user.fullName || userId}`);
       } catch (error) {
         console.error(`   ❌ Error updating ${user.fullName || userId}:`, error.message);
       }
