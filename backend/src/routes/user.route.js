@@ -4,6 +4,7 @@ import {
   acceptFriendRequest,
   deleteAccount,
   getFriendRequests,
+  getIncomingFriendReqs,
   getMyFriends,
   getOutgoingFriendReqs,
   getRecommendedUsers,
@@ -29,6 +30,7 @@ router.put("/friend-request/:id/accept", acceptFriendRequest);
 
 router.get("/friend-requests", getFriendRequests);
 router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
+router.get("/incoming-friend-requests", getIncomingFriendReqs);
 
 router.put("/profile", updateProfile);
 router.delete("/friends/:id", removeFriend);

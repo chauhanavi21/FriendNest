@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { searchUsers, getOutgoingFriendReqs, sendFriendRequest } from "../lib/api";
-import { SearchIcon, MapPinIcon, UserPlusIcon, CheckCircleIcon, FilterIcon, MessageSquareIcon } from "lucide-react";
+import { searchUsers, getOutgoingFriendReqs, getIncomingFriendReqs, sendFriendRequest, acceptFriendRequest } from "../lib/api";
+import { SearchIcon, MapPinIcon, UserPlusIcon, CheckCircleIcon, FilterIcon, MessageSquareIcon, UserCheckIcon } from "lucide-react";
 import { Link } from "react-router";
 import { LANGUAGES } from "../constants";
 import { capitialize } from "../lib/utils";
@@ -17,6 +17,7 @@ const SearchPage = () => {
   const [location, setLocation] = useState("");
   const [sortBy, setSortBy] = useState("recentlyActive");
   const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
+  const [incomingRequestsMap, setIncomingRequestsMap] = useState(new Map());
 
   const hasActiveSearch = Boolean(searchQuery.trim() || nativeLanguage || learningLanguage || location);
 
@@ -36,6 +37,11 @@ const SearchPage = () => {
   const { data: outgoingFriendReqs } = useQuery({
     queryKey: ["outgoingFriendReqs"],
     queryFn: getOutgoingFriendReqs,
+  });
+
+  const { data: incomingFriendReqs } = useQuery({
+    queryKey: ["incomingFriendReqs"],
+    queryFn: getIncomingFriendReqs,
   });
 
   const { data: friends = [] } = useQuery({
@@ -58,7 +64,17 @@ const SearchPage = () => {
     }
   }, [outgoingFriendReqs]);
 
-  const { mutate: sendRequestMutation, isPending } = useMutation({
+  useEffect(() => {
+    if (incomingFriendReqs && incomingFriendReqs.length > 0) {
+      const incomingMap = new Map();
+      incomingFriendReqs.forEach((req) => {
+        incomingMap.set(req.sender._id, req._id);
+      });
+      setIncomingRequestsMap(incomingMap);
+    }
+  }, [incomingFriendReqs]);
+
+  const { mutate: sendRequestMutation, isPending: isSendingRequest } = useMutation({
     mutationFn: sendFriendRequest,
     onSuccess: () => {
       toast.success("Friend request sent!");
@@ -70,8 +86,26 @@ const SearchPage = () => {
     },
   });
 
+  const { mutate: acceptRequestMutation, isPending: isAcceptingRequest } = useMutation({
+    mutationFn: acceptFriendRequest,
+    onSuccess: () => {
+      toast.success("Friend request accepted!");
+      queryClient.invalidateQueries({ queryKey: ["incomingFriendReqs"] });
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["searchUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to accept friend request");
+    },
+  });
+
   const handleSendRequest = (userId) => {
     sendRequestMutation(userId);
+  };
+
+  const handleAcceptRequest = (requestId) => {
+    acceptRequestMutation(requestId);
   };
 
 
@@ -224,6 +258,8 @@ const SearchPage = () => {
               {users.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
                 const isAlreadyFriend = friendsIds.has(user._id);
+                const incomingRequestId = incomingRequestsMap.get(user._id);
+                const hasIncomingRequest = Boolean(incomingRequestId);
 
                 return (
                   <div
@@ -278,13 +314,22 @@ const SearchPage = () => {
                           <MessageSquareIcon className="size-3 sm:size-4 mr-1" />
                           <span>Send Message</span>
                         </Link>
+                      ) : hasIncomingRequest ? (
+                        <button
+                          className="btn btn-success w-full h-10 min-h-10 sm:h-11 sm:min-h-11 text-xs sm:text-sm"
+                          onClick={() => handleAcceptRequest(incomingRequestId)}
+                          disabled={isAcceptingRequest}
+                        >
+                          <UserCheckIcon className="size-3 sm:size-4 mr-1" />
+                          <span>Accept Request</span>
+                        </button>
                       ) : (
                         <button
                           className={`btn w-full h-10 min-h-10 sm:h-11 sm:min-h-11 text-xs sm:text-sm ${
                             hasRequestBeenSent ? "btn-disabled" : "btn-primary"
                           }`}
                           onClick={() => handleSendRequest(user._id)}
-                          disabled={hasRequestBeenSent || isPending}
+                          disabled={hasRequestBeenSent || isSendingRequest}
                         >
                           {hasRequestBeenSent ? (
                             <>

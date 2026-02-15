@@ -11,11 +11,14 @@ import groupRoutes from "./routes/group.route.js";
 import notificationRoutes from "./routes/notification.route.js";
 
 import { connectDB } from "./lib/db.js";
+import job from "./config/cron.js";
 
 const app = express();
 const PORT = process.env.PORT;
 
 const __dirname = path.resolve();
+
+if (process.env.NODE_ENV === "production") job.start();
 
 app.use(
   cors({

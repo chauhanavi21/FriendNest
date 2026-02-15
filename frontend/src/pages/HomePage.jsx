@@ -1,23 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
+  acceptFriendRequest,
+  getIncomingFriendReqs,
   getOutgoingFriendReqs,
   getRecommendedUsers,
   getUserFriends,
   sendFriendRequest,
 } from "../lib/api";
 import { Link } from "react-router";
-import { CheckCircleIcon, MapPinIcon, UserPlusIcon, UsersIcon } from "lucide-react";
+import { CheckCircleIcon, MapPinIcon, UserCheckIcon, UserPlusIcon, UsersIcon } from "lucide-react";
 
 import { capitialize } from "../lib/utils";
 
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
 import Avatar from "../components/Avatar";
+import toast from "react-hot-toast";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
   const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
+  const [incomingRequestsMap, setIncomingRequestsMap] = useState(new Map());
 
   const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
@@ -34,9 +38,34 @@ const HomePage = () => {
     queryFn: getOutgoingFriendReqs,
   });
 
-  const { mutate: sendRequestMutation, isPending } = useMutation({
+  const { data: incomingFriendReqs } = useQuery({
+    queryKey: ["incomingFriendReqs"],
+    queryFn: getIncomingFriendReqs,
+  });
+
+  const { mutate: sendRequestMutation, isPending: isSendingRequest } = useMutation({
     mutationFn: sendFriendRequest,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] }),
+    onSuccess: () => {
+      toast.success("Friend request sent!");
+      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to send friend request");
+    },
+  });
+
+  const { mutate: acceptRequestMutation, isPending: isAcceptingRequest } = useMutation({
+    mutationFn: acceptFriendRequest,
+    onSuccess: () => {
+      toast.success("Friend request accepted!");
+      queryClient.invalidateQueries({ queryKey: ["incomingFriendReqs"] });
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["friendRequests"] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Failed to accept friend request");
+    },
   });
 
   useEffect(() => {
@@ -48,6 +77,16 @@ const HomePage = () => {
       setOutgoingRequestsIds(outgoingIds);
     }
   }, [outgoingFriendReqs]);
+
+  useEffect(() => {
+    const incomingMap = new Map();
+    if (incomingFriendReqs && incomingFriendReqs.length > 0) {
+      incomingFriendReqs.forEach((req) => {
+        incomingMap.set(req.sender._id, req._id); // Map sender ID to request ID
+      });
+      setIncomingRequestsMap(incomingMap);
+    }
+  }, [incomingFriendReqs]);
 
   return (
     <div className="p-4 sm:p-5 md:p-6 lg:p-8 pb-6 sm:pb-8 bg-base-100 min-h-full relative">
@@ -101,6 +140,8 @@ const HomePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {recommendedUsers.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
+                const incomingRequestId = incomingRequestsMap.get(user._id);
+                const hasIncomingRequest = Boolean(incomingRequestId);
 
                 return (
                   <div
@@ -138,25 +179,36 @@ const HomePage = () => {
                         </p>
                       )}
 
-                      <button
-                        className={`btn w-full h-9 min-h-9 sm:h-10 sm:min-h-10 text-xs sm:text-sm ${
-                          hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        }`}
-                        onClick={() => sendRequestMutation(user._id)}
-                        disabled={hasRequestBeenSent || isPending}
-                      >
-                        {hasRequestBeenSent ? (
-                          <>
-                            <CheckCircleIcon className="size-3 sm:size-4 mr-1" />
-                            <span>Sent</span>
-                          </>
-                        ) : (
-                          <>
-                            <UserPlusIcon className="size-3 sm:size-4 mr-1" />
-                            <span>Add Friend</span>
-                          </>
-                        )}
-                      </button>
+                      {hasIncomingRequest ? (
+                        <button
+                          className="btn btn-success w-full h-9 min-h-9 sm:h-10 sm:min-h-10 text-xs sm:text-sm"
+                          onClick={() => acceptRequestMutation(incomingRequestId)}
+                          disabled={isAcceptingRequest}
+                        >
+                          <UserCheckIcon className="size-3 sm:size-4 mr-1" />
+                          <span>Accept Request</span>
+                        </button>
+                      ) : (
+                        <button
+                          className={`btn w-full h-9 min-h-9 sm:h-10 sm:min-h-10 text-xs sm:text-sm ${
+                            hasRequestBeenSent ? "btn-disabled" : "btn-primary"
+                          }`}
+                          onClick={() => sendRequestMutation(user._id)}
+                          disabled={hasRequestBeenSent || isSendingRequest}
+                        >
+                          {hasRequestBeenSent ? (
+                            <>
+                              <CheckCircleIcon className="size-3 sm:size-4 mr-1" />
+                              <span>Sent</span>
+                            </>
+                          ) : (
+                            <>
+                              <UserPlusIcon className="size-3 sm:size-4 mr-1" />
+                              <span>Add Friend</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
