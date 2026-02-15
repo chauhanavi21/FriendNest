@@ -1,6 +1,7 @@
 import Group from "../models/Group.js";
 import { StreamChat } from "stream-chat";
 import "dotenv/config";
+import mongoose from "mongoose";
 
 const streamClient = StreamChat.getInstance(
   process.env.STEAM_API_KEY,
@@ -57,9 +58,18 @@ export async function createGroup(req, res) {
       return res.status(400).json({ message: "Name and language are required" });
     }
 
+    // Validate name length
+    const trimmedName = name.trim();
+    if (trimmedName.length < 3) {
+      return res.status(400).json({ message: "Group name must be at least 3 characters" });
+    }
+    if (trimmedName.length > 100) {
+      return res.status(400).json({ message: "Group name must be less than 100 characters" });
+    }
+
     // Create group in MongoDB
     const group = new Group({
-      name: name.trim(),
+      name: trimmedName,
       description: description?.trim() || "",
       language,
       coverImage: coverImage || "",
@@ -171,6 +181,11 @@ export async function getGroupById(req, res) {
     const { id } = req.params;
     const userId = req.user.id;
 
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
+
     let group = await Group.findById(id)
       .populate("creator", "fullName profilePic email")
       .populate("members", "fullName profilePic")
@@ -203,6 +218,11 @@ export async function joinGroup(req, res) {
   try {
     const userId = req.user.id;
     const { id } = req.params;
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
 
     const group = await Group.findById(id);
     if (!group) {
@@ -247,6 +267,11 @@ export async function leaveGroup(req, res) {
     const userId = req.user.id;
     const { id } = req.params;
 
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
+
     const group = await Group.findById(id);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
@@ -259,6 +284,24 @@ export async function leaveGroup(req, res) {
     if (!group.members.includes(userId)) {
       return res.status(400).json({ message: "You are not a member of this group" });
     }
+
+    // Remove user from all events they're attending or organizing
+    group.events.forEach((event) => {
+      // Remove as attendee
+      event.attendees = event.attendees.filter(
+        (attendeeId) => attendeeId.toString() !== userId
+      );
+      // If they're the organizer and there are other attendees, assign first attendee as new organizer
+      // Otherwise, keep the event with no organizer (will be cleaned up)
+      if (event.organizer.toString() === userId) {
+        if (event.attendees.length > 0) {
+          event.organizer = event.attendees[0];
+        }
+      }
+    });
+
+    // Remove events with no attendees
+    group.events = group.events.filter((event) => event.attendees.length > 0);
 
     group.members = group.members.filter(
       (memberId) => memberId.toString() !== userId
@@ -289,6 +332,11 @@ export async function updateGroup(req, res) {
     const { id } = req.params;
     const { name, description, language, coverImage } = req.body;
 
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
+
     const group = await Group.findById(id);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
@@ -298,7 +346,17 @@ export async function updateGroup(req, res) {
       return res.status(403).json({ message: "Only the group creator can update the group" });
     }
 
-    if (name) group.name = name.trim();
+    // Validate name if provided
+    if (name) {
+      const trimmedName = name.trim();
+      if (trimmedName.length < 3) {
+        return res.status(400).json({ message: "Group name must be at least 3 characters" });
+      }
+      if (trimmedName.length > 100) {
+        return res.status(400).json({ message: "Group name must be less than 100 characters" });
+      }
+      group.name = trimmedName;
+    }
     if (description !== undefined) group.description = description.trim();
     if (language) group.language = language;
     if (coverImage !== undefined) group.coverImage = coverImage;
@@ -330,6 +388,11 @@ export async function deleteGroup(req, res) {
   try {
     const userId = req.user.id;
     const { id } = req.params;
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
 
     const group = await Group.findById(id);
     if (!group) {
@@ -366,8 +429,19 @@ export async function createEvent(req, res) {
     const { id: groupId } = req.params;
     const { title, description, date, location } = req.body;
 
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
+
     if (!title || !date) {
       return res.status(400).json({ message: "Title and date are required" });
+    }
+
+    // Validate event date is in the future
+    const eventDate = new Date(date);
+    if (eventDate < new Date()) {
+      return res.status(400).json({ message: "Event date must be in the future" });
     }
 
     const group = await Group.findById(groupId);
@@ -379,10 +453,16 @@ export async function createEvent(req, res) {
       return res.status(403).json({ message: "You must be a member of the group to create events" });
     }
 
+    // Validate title length
+    const trimmedTitle = title.trim();
+    if (trimmedTitle.length < 3) {
+      return res.status(400).json({ message: "Event title must be at least 3 characters" });
+    }
+
     const event = {
-      title: title.trim(),
+      title: trimmedTitle,
       description: description?.trim() || "",
-      date: new Date(date),
+      date: eventDate,
       location: location?.trim() || "",
       organizer: userId,
       attendees: [userId], // Organizer is automatically an attendee
@@ -409,14 +489,32 @@ export async function joinEvent(req, res) {
     const userId = req.user.id;
     const { id: groupId, eventId } = req.params;
 
+    // Validate MongoDB ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({ message: "Invalid event ID" });
+    }
+
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
 
+    // Must be a member of the group to join events
+    if (!group.members.includes(userId)) {
+      return res.status(403).json({ message: "You must be a member of the group to join events" });
+    }
+
     const event = group.events.id(eventId);
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Check if event is in the past
+    if (new Date(event.date) < new Date()) {
+      return res.status(400).json({ message: "Cannot join an event that has already passed" });
     }
 
     if (event.attendees.includes(userId)) {
@@ -444,6 +542,14 @@ export async function leaveEvent(req, res) {
     const userId = req.user.id;
     const { id: groupId, eventId } = req.params;
 
+    // Validate MongoDB ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({ message: "Invalid event ID" });
+    }
+
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
@@ -456,6 +562,20 @@ export async function leaveEvent(req, res) {
 
     if (!event.attendees.includes(userId)) {
       return res.status(400).json({ message: "You are not attending this event" });
+    }
+
+    // Event organizer leaving - reassign or delete
+    if (event.organizer.toString() === userId) {
+      if (event.attendees.length > 1) {
+        // Assign first non-organizer attendee as new organizer
+        const newOrganizer = event.attendees.find((id) => id.toString() !== userId);
+        event.organizer = newOrganizer;
+      } else {
+        // Last attendee is the organizer, delete the event
+        group.events.pull(eventId);
+        await group.save();
+        return res.status(200).json({ message: "Event deleted as no attendees remain" });
+      }
     }
 
     event.attendees = event.attendees.filter(
@@ -476,6 +596,14 @@ export async function deleteEvent(req, res) {
     const userId = req.user.id;
     const { id: groupId, eventId } = req.params;
 
+    // Validate MongoDB ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({ message: "Invalid event ID" });
+    }
+
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
@@ -486,8 +614,9 @@ export async function deleteEvent(req, res) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    if (event.organizer.toString() !== userId) {
-      return res.status(403).json({ message: "Only the event organizer can delete the event" });
+    // Allow both event organizer and group creator to delete events
+    if (event.organizer.toString() !== userId && group.creator.toString() !== userId) {
+      return res.status(403).json({ message: "Only the event organizer or group creator can delete the event" });
     }
 
     group.events.pull(eventId);

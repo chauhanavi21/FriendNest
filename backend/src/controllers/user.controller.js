@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
+import mongoose from "mongoose";
 
 export async function getRecommendedUsers(req, res) {
   try {
@@ -37,6 +38,11 @@ export async function sendFriendRequest(req, res) {
   try {
     const myId = req.user.id;
     const { id: recipientId } = req.params;
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(recipientId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
 
     // prevent sending req to yourself
     if (myId === recipientId) {
@@ -119,6 +125,11 @@ export async function acceptFriendRequest(req, res) {
   try {
     const { id: requestId } = req.params;
 
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(requestId)) {
+      return res.status(400).json({ message: "Invalid request ID" });
+    }
+
     const friendRequest = await FriendRequest.findById(requestId);
 
     if (!friendRequest) {
@@ -160,6 +171,9 @@ export async function getFriendRequests(req, res) {
       status: "pending",
     }).populate("sender", "fullName profilePic nativeLanguage learningLanguage");
 
+    // Filter out requests from deleted users
+    const validIncomingReqs = incomingReqs.filter((req) => req.sender && req.sender._id);
+
     // Get accepted requests where current user is the sender (they sent the request)
     const acceptedReqsAsSender = await FriendRequest.find({
       sender: currentUserId,
@@ -178,14 +192,7 @@ export async function getFriendRequests(req, res) {
       .sort({ updatedAt: -1 })
       .limit(10);
 
-    // Get removed notifications where current user was removed (they are the recipient)
-    const removedReqs = await FriendRequest.find({
-      recipient: currentUserId,
-      status: "removed",
-    })
-      .populate("sender", "fullName profilePic")
-      .sort({ updatedAt: -1 })
-      .limit(10);
+    // Note: Removed 'removed' status handling as we've changed the friend removal flow
 
     // Combine and format accepted requests with role information
     const acceptedReqs = [
@@ -201,7 +208,7 @@ export async function getFriendRequests(req, res) {
       })),
     ].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
-    res.status(200).json({ incomingReqs, acceptedReqs, removedReqs });
+    res.status(200).json({ incomingReqs: validIncomingReqs, acceptedReqs, removedReqs: [] });
   } catch (error) {
     console.log("Error in getPendingFriendRequests controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -242,8 +249,26 @@ export async function updateProfile(req, res) {
     const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic } = req.body;
 
     const updateData = {};
-    if (fullName) updateData.fullName = fullName;
-    if (bio !== undefined) updateData.bio = bio;
+    
+    // Validate fullName if provided
+    if (fullName) {
+      const trimmedName = fullName.trim();
+      if (trimmedName.length < 2) {
+        return res.status(400).json({ message: "Full name must be at least 2 characters" });
+      }
+      if (trimmedName.length > 100) {
+        return res.status(400).json({ message: "Full name must be less than 100 characters" });
+      }
+      updateData.fullName = trimmedName;
+    }
+    
+    if (bio !== undefined) {
+      if (bio.length > 500) {
+        return res.status(400).json({ message: "Bio must be less than 500 characters" });
+      }
+      updateData.bio = bio;
+    }
+    
     if (nativeLanguage) updateData.nativeLanguage = nativeLanguage;
     if (learningLanguage) updateData.learningLanguage = learningLanguage;
     if (location !== undefined) updateData.location = location;
@@ -283,6 +308,11 @@ export async function removeFriend(req, res) {
     const myId = req.user.id;
     const { id: friendId } = req.params;
 
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(friendId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
     // Prevent removing yourself
     if (myId === friendId) {
       return res.status(400).json({ message: "You can't remove yourself as a friend" });
@@ -291,7 +321,7 @@ export async function removeFriend(req, res) {
     // Check if the friend exists
     const friend = await User.findById(friendId);
     if (!friend) {
-      return res.status(404).json({ message: "Friend not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Get current user
@@ -323,13 +353,8 @@ export async function removeFriend(req, res) {
       ],
     });
 
-    // Create a notification for the removed friend
-    // This creates a FriendRequest entry with status "removed" to notify the friend
-    await FriendRequest.create({
-      sender: myId,
-      recipient: friendId,
-      status: "removed",
-    });
+    // Note: We don't create a 'removed' status friend request anymore
+    // as it can cause confusion. Users can simply send new requests if needed.
 
     res.status(200).json({ message: "Friend removed successfully" });
   } catch (error) {

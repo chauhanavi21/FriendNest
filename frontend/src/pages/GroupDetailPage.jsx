@@ -133,10 +133,28 @@ const GroupDetailPage = () => {
 
   const handleCreateEvent = (e) => {
     e.preventDefault();
+    
+    // Validate required fields
     if (!eventForm.title || !eventForm.date) {
       toast.error("Title and date are required");
       return;
     }
+    
+    // Validate title length
+    const trimmedTitle = eventForm.title.trim();
+    if (trimmedTitle.length < 3) {
+      toast.error("Event title must be at least 3 characters");
+      return;
+    }
+    
+    // Validate event date is in the future
+    const eventDate = new Date(eventForm.date);
+    const now = new Date();
+    if (eventDate <= now) {
+      toast.error("Event date must be in the future");
+      return;
+    }
+    
     createEventMutation(eventForm);
   };
 

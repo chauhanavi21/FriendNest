@@ -1,5 +1,6 @@
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
+import mongoose from "mongoose";
 
 export async function getNotifications(req, res) {
   try {
@@ -10,13 +11,18 @@ export async function getNotifications(req, res) {
       .sort({ createdAt: -1 })
       .limit(100);
 
+    // Filter out notifications with deleted senders
+    const validNotifications = notifications.filter(
+      (notification) => !notification.sender || notification.sender._id
+    );
+
     const unreadCount = await Notification.countDocuments({
       user: userId,
       isRead: false,
     });
 
     res.status(200).json({
-      notifications,
+      notifications: validNotifications,
       unreadCount,
     });
   } catch (error) {
@@ -29,6 +35,11 @@ export async function markNotificationAsRead(req, res) {
   try {
     const userId = req.user.id;
     const { notificationId } = req.params;
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(notificationId)) {
+      return res.status(400).json({ message: "Invalid notification ID" });
+    }
 
     const notification = await Notification.findOne({
       _id: notificationId,
@@ -74,8 +85,22 @@ export async function createMessageNotification(req, res) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Validate MongoDB ObjectId for senderId
+    if (!mongoose.Types.ObjectId.isValid(senderId)) {
+      return res.status(400).json({ message: "Invalid sender ID" });
+    }
+
+    // Validate senderId is not the same as userId (can't send notification to yourself)
+    if (senderId === userId) {
+      return res.status(400).json({ message: "Cannot create notification for yourself" });
+    }
+
     // Check user's notification settings
     const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
     if (!user?.settings?.notifications?.messages) {
       return res.status(200).json({ message: "Notifications disabled" });
     }

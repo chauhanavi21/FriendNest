@@ -59,6 +59,24 @@ const ProfilePage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate full name
+    const trimmedName = formState.fullName.trim();
+    if (trimmedName.length < 2) {
+      toast.error("Full name must be at least 2 characters");
+      return;
+    }
+    if (trimmedName.length > 100) {
+      toast.error("Full name must be less than 100 characters");
+      return;
+    }
+    
+    // Validate bio length
+    if (formState.bio.length > 500) {
+      toast.error("Bio must be less than 500 characters");
+      return;
+    }
+    
     updateProfileMutation(formState);
   };
 

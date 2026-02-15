@@ -106,10 +106,24 @@ const GroupsPage = () => {
 
   const handleCreateGroup = (e) => {
     e.preventDefault();
+    
+    // Validate required fields
     if (!createForm.name || !createForm.language) {
       toast.error("Name and language are required");
       return;
     }
+    
+    // Validate name length
+    const trimmedName = createForm.name.trim();
+    if (trimmedName.length < 3) {
+      toast.error("Group name must be at least 3 characters");
+      return;
+    }
+    if (trimmedName.length > 100) {
+      toast.error("Group name must be less than 100 characters");
+      return;
+    }
+    
     createGroupMutation(createForm);
   };
 
